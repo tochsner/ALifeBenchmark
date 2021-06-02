@@ -1,0 +1,6 @@
+const NUM_THREADS = 4
+const SLICE_SIZE = 5
+
+const MAX_SEARCH_DISTANCE = 100
+
+const MAX_MEMORY_CAPACITY = 0.8
