@@ -22,10 +22,10 @@ function apply!(::PUSH_B, organism::TierrianOrganism, model::TierraModel) push!(
 function apply!(::PUSH_C, organism::TierrianOrganism, model::TierraModel) push!(organism.stack, organism.c) end
 function apply!(::PUSH_D, organism::TierrianOrganism, model::TierraModel) push!(organism.stack, organism.d) end
 
-function apply!(::POP_A, organism::TierrianOrganism, model::TierraModel) organism.a = pop!(organism.stack) end
-function apply!(::POP_B, organism::TierrianOrganism, model::TierraModel) organism.b = pop!(organism.stack) end
-function apply!(::POP_C, organism::TierrianOrganism, model::TierraModel) organism.c = pop!(organism.stack) end
-function apply!(::POP_D, organism::TierrianOrganism, model::TierraModel) organism.d = pop!(organism.stack) end
+function apply!(::POP_A, organism::TierrianOrganism, model::TierraModel) organism.a = _pop_stack!(organism) end
+function apply!(::POP_B, organism::TierrianOrganism, model::TierraModel) organism.b = _pop_stack!(organism) end
+function apply!(::POP_C, organism::TierrianOrganism, model::TierraModel) organism.c = _pop_stack!(organism) end
+function apply!(::POP_D, organism::TierrianOrganism, model::TierraModel) organism.d = _pop_stack!(organism) end
 
 function apply!(::JMP, organism::TierrianOrganism, model::TierraModel) 
     organism.ip, _ = search_template(model, organism, organism.ip, SearchBoth())
@@ -39,7 +39,7 @@ function apply!(::CALL, organism::TierrianOrganism, model::TierraModel)
     push!(organism.stack, organism.ip)
     organism.ip = callee_address
 end
-function apply!(::RET, organism::TierrianOrganism, model::TierraModel) organism.ip = pop!(organism.stack) end
+function apply!(::RET, organism::TierrianOrganism, model::TierraModel) organism.ip = _pop_stack!(organism) end
 
 function apply!(::MOV_AB, organism::TierrianOrganism, model::TierraModel) organism.b = organism.a end
 function apply!(::MOV_CD, organism::TierrianOrganism, model::TierraModel) organism.d = organism.c end
@@ -60,3 +60,12 @@ end
 
 function apply!(::MALLOC, organism::TierrianOrganism, model::TierraModel) allocate_daughter(model, organism) end
 function apply!(::DIVIDE, organism::TierrianOrganism, model::TierraModel) divide(model, organism) end
+
+function _pop_stack!(organism::TierrianOrganism)
+    if isempty(organism.stack)
+        organism.error_flag = true
+        return 0
+    else
+        return pop!(organism.stack) 
+    end
+end

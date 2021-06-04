@@ -2,6 +2,9 @@ using Printf
 
 function Base.show(io::IO, organism::TierrianOrganism, model::TierraModel)
     println(io, "-"^10)
+
+    println(io, organism.hash)
+    println(io, organism.parent_hash)
     
     println(io, "*Last Instruction*")
 

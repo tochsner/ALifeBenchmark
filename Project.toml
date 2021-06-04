@@ -3,6 +3,10 @@ uuid = "439d69cc-e0bf-49d0-b082-3f737e8414aa"
 authors = ["Tobia Ochsner <tobia.ochnser@hotmail.com> and contributors"]
 version = "0.1.0"
 
+[deps]
+ProfileView = "c46f51b8-102a-5cf2-8d2c-8597cb0e0da7"
+StatProfilerHTML = "a8a75453-ed82-57c9-9e16-4cd1196ecbf5"
+
 [compat]
 julia = "1"
 

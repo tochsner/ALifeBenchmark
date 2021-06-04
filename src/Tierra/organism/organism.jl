@@ -1,6 +1,9 @@
 using DataStructures: CircularBuffer
+using SHA
 
 mutable struct TierrianOrganism
+    key::UInt64
+
     a::UInt16
     b::UInt16
     c::UInt16
@@ -19,8 +22,11 @@ mutable struct TierrianOrganism
     daughter_address::UInt16
     daughter_length::UInt16
 
+    hash::String
+    parent_hash::String
+
     function TierrianOrganism(start_address::UInt16, length::UInt16)
-        new(0, 0, 0, 0, CircularBuffer{UInt16}(10), start_address, false, start_address, length, false, 0, 0)
+        new(0, 0, 0, 0, 0, CircularBuffer{UInt16}(10), start_address, false, start_address, length, false, 0, 0, "", "")
     end
 end
 

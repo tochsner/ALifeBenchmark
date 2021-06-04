@@ -1,0 +1,114 @@
+===============================================================================
+EXTENSION NAME : linecounter
+EXTENSION VERSION : 0.2.7
+-------------------------------------------------------------------------------
+count time : 2021-06-02 14:47:58
+count workspace : c:\Users\tobia\.julia\dev\ALifeBenchmark
+total files : 36
+total code lines : 1103
+total comment lines : 0
+total blank lines : 295
+
+    statistics
+   |      extension|     total code|  total comment|    total blank|percent|
+   -------------------------------------------------------------------------
+   |            .jl|           1042|              0|            287|     94|
+   |          .toml|             11|              0|              4|    1.0|
+   |               |             18|              0|              4|    1.6|
+   |            .md|              1|              0|              0|  0.091|
+   |           .yml|             31|              0|              0|    2.8|
+   -------------------------------------------------------------------------
+.github\workflows\CompatHelper.yml, code is 16, comment is 0, blank is 0.
+.github\workflows\TagBot.yml, code is 15, comment is 0, blank is 0.
+.gitignore, code is 1, comment is 0, blank is 0.
+LICENSE, code is 17, comment is 0, blank is 4.
+Manifest.toml, code is 1, comment is 0, blank is 1.
+Project.toml, code is 10, comment is 0, blank is 3.
+README.md, code is 1, comment is 0, blank is 0.
+src\ALifeBenchmark.jl, code is 35, comment is 0, blank is 23.
+src\analysis\selective_factors.jl, code is 17, comment is 0, blank is 4.
+src\analysis\statistics.jl, code is 37, comment is 0, blank is 11.
+src\history\history.jl, code is 60, comment is 0, blank is 21.
+src\history\types.jl, code is 31, comment is 0, blank is 9.
+src\random_model.jl, code is 30, comment is 0, blank is 7.
+src\Tierra\config.jl, code is 4, comment is 0, blank is 2.
+src\Tierra\instructions\definitions.jl, code is 105, comment is 0, blank is 16.
+src\Tierra\instructions\implementation.jl, code is 51, comment is 0, blank is 11.
+src\Tierra\large_ancestor.jl, code is 82, comment is 0, blank is 0.
+src\Tierra\organism\organism.jl, code is 21, comment is 0, blank is 8.
+src\Tierra\organism\template_search.jl, code is 50, comment is 0, blank is 18.
+src\Tierra\show.jl, code is 41, comment is 0, blank is 11.
+src\Tierra\small_ancestor.jl, code is 24, comment is 0, blank is 0.
+src\Tierra\world\division.jl, code is 25, comment is 0, blank is 6.
+src\Tierra\world\execution.jl, code is 23, comment is 0, blank is 8.
+src\Tierra\world\free_memory_block.jl, code is 4, comment is 0, blank is 0.
+src\Tierra\world\memory.jl, code is 111, comment is 0, blank is 37.
+src\Tierra\world\memory_utils.jl, code is 42, comment is 0, blank is 3.
+src\Tierra\world\tierra_model.jl, code is 47, comment is 0, blank is 19.
+src\utils\group_by.jl, code is 16, comment is 0, blank is 5.
+src\utils\model.jl, code is 16, comment is 0, blank is 6.
+src\utils\organism.jl, code is 20, comment is 0, blank is 8.
+test\runtests.jl, code is 8, comment is 0, blank is 3.
+test\test.jl, code is 12, comment is 0, blank is 8.
+test\Tierra\ancestor_tests.jl, code is 14, comment is 0, blank is 5.
+test\Tierra\instruction_tests.jl, code is 22, comment is 0, blank is 4.
+test\Tierra\memory_tests.jl, code is 60, comment is 0, blank is 25.
+test\Tierra\memory_utils_tests.jl, code is 34, comment is 0, blank is 9.
+===============================================================================
+===============================================================================
+EXTENSION NAME : linecounter
+EXTENSION VERSION : 0.2.7
+-------------------------------------------------------------------------------
+count time : 2021-06-03 10:15:18
+count workspace : c:\Users\tobia\.julia\dev\ALifeBenchmark
+total files : 36
+total code lines : 1103
+total comment lines : 0
+total blank lines : 295
+
+    statistics
+   |      extension|     total code|  total comment|    total blank|percent|
+   -------------------------------------------------------------------------
+   |            .jl|           1042|              0|            287|     94|
+   |          .toml|             11|              0|              4|    1.0|
+   |               |             18|              0|              4|    1.6|
+   |            .md|              1|              0|              0|  0.091|
+   |           .yml|             31|              0|              0|    2.8|
+   -------------------------------------------------------------------------
+.github\workflows\CompatHelper.yml, code is 16, comment is 0, blank is 0.
+.github\workflows\TagBot.yml, code is 15, comment is 0, blank is 0.
+.gitignore, code is 1, comment is 0, blank is 0.
+LICENSE, code is 17, comment is 0, blank is 4.
+Manifest.toml, code is 1, comment is 0, blank is 1.
+Project.toml, code is 10, comment is 0, blank is 3.
+README.md, code is 1, comment is 0, blank is 0.
+src\ALifeBenchmark.jl, code is 35, comment is 0, blank is 23.
+src\analysis\selective_factors.jl, code is 17, comment is 0, blank is 4.
+src\analysis\statistics.jl, code is 37, comment is 0, blank is 11.
+src\history\history.jl, code is 60, comment is 0, blank is 21.
+src\history\types.jl, code is 31, comment is 0, blank is 9.
+src\random_model.jl, code is 30, comment is 0, blank is 7.
+src\Tierra\config.jl, code is 4, comment is 0, blank is 2.
+src\Tierra\instructions\definitions.jl, code is 105, comment is 0, blank is 16.
+src\Tierra\instructions\implementation.jl, code is 51, comment is 0, blank is 11.
+src\Tierra\large_ancestor.jl, code is 82, comment is 0, blank is 0.
+src\Tierra\organism\organism.jl, code is 21, comment is 0, blank is 8.
+src\Tierra\organism\template_search.jl, code is 50, comment is 0, blank is 18.
+src\Tierra\show.jl, code is 41, comment is 0, blank is 11.
+src\Tierra\small_ancestor.jl, code is 24, comment is 0, blank is 0.
+src\Tierra\world\division.jl, code is 25, comment is 0, blank is 6.
+src\Tierra\world\execution.jl, code is 23, comment is 0, blank is 8.
+src\Tierra\world\free_memory_block.jl, code is 4, comment is 0, blank is 0.
+src\Tierra\world\memory.jl, code is 111, comment is 0, blank is 37.
+src\Tierra\world\memory_utils.jl, code is 42, comment is 0, blank is 3.
+src\Tierra\world\tierra_model.jl, code is 47, comment is 0, blank is 19.
+src\utils\group_by.jl, code is 16, comment is 0, blank is 5.
+src\utils\model.jl, code is 16, comment is 0, blank is 6.
+src\utils\organism.jl, code is 20, comment is 0, blank is 8.
+test\runtests.jl, code is 8, comment is 0, blank is 3.
+test\test.jl, code is 12, comment is 0, blank is 8.
+test\Tierra\ancestor_tests.jl, code is 14, comment is 0, blank is 5.
+test\Tierra\instruction_tests.jl, code is 22, comment is 0, blank is 4.
+test\Tierra\memory_tests.jl, code is 60, comment is 0, blank is 25.
+test\Tierra\memory_utils_tests.jl, code is 34, comment is 0, blank is 9.
+===============================================================================

@@ -5,6 +5,15 @@ function allocate_daughter(model::TierraModel, organism::TierrianOrganism)
     end
 
     daughter_length = organism.c
+
+    if (daughter_length == 0 || 
+        daughter_length < MIN_DAUGHTER_SIZE ||
+        organism.length * MAX_DAUGHTER_GROWTH < daughter_length)
+        
+        organism.error_flag = true
+        return
+    end
+
     alloc_start = allocate_free_memory!(model, daughter_length)
 
     if alloc_start == -1 # no memory found
@@ -15,7 +24,7 @@ function allocate_daughter(model::TierraModel, organism::TierrianOrganism)
     organism.has_daughter = true
     organism.daughter_address = alloc_start
     organism.daughter_length = daughter_length
-    organism.a = alloc_start    
+    organism.a = alloc_start
 end
 
 function divide(model::TierraModel, organism::TierrianOrganism)
@@ -26,6 +35,8 @@ function divide(model::TierraModel, organism::TierrianOrganism)
 
     daughter = TierrianOrganism(organism.daughter_address, organism.daughter_length)
     add_organism!(model, daughter)
+    set_hash!(daughter, model)
+    daughter.parent_hash = organism.hash    
 
     organism.has_daughter = false
 end

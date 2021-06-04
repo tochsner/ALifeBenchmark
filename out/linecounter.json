@@ -1,0 +1,513 @@
+{
+    "extension": "linecounter",
+    "version": "0.2.7",
+    "workspace": "c:\\Users\\tobia\\.julia\\dev\\ALifeBenchmark",
+    "linecount": [
+        {
+            "version": "0.2.7",
+            "counttime": "2021-06-02 14:47:58",
+            "filesum": 36,
+            "codesum": 1103,
+            "commentsum": 0,
+            "blanksum": 295,
+            "statistics": {
+                ".jl": {
+                    "code": 1042,
+                    "comment": 0,
+                    "blank": 287
+                },
+                ".toml": {
+                    "code": 11,
+                    "comment": 0,
+                    "blank": 4
+                },
+                "": {
+                    "code": 18,
+                    "comment": 0,
+                    "blank": 4
+                },
+                ".md": {
+                    "code": 1,
+                    "comment": 0,
+                    "blank": 0
+                },
+                ".yml": {
+                    "code": 31,
+                    "comment": 0,
+                    "blank": 0
+                }
+            },
+            "filelist": [
+                {
+                    "blank": 0,
+                    "code": 16,
+                    "comment": 0,
+                    "filename": ".github\\workflows\\CompatHelper.yml"
+                },
+                {
+                    "blank": 0,
+                    "code": 15,
+                    "comment": 0,
+                    "filename": ".github\\workflows\\TagBot.yml"
+                },
+                {
+                    "blank": 0,
+                    "code": 1,
+                    "comment": 0,
+                    "filename": ".gitignore"
+                },
+                {
+                    "blank": 4,
+                    "code": 17,
+                    "comment": 0,
+                    "filename": "LICENSE"
+                },
+                {
+                    "blank": 1,
+                    "code": 1,
+                    "comment": 0,
+                    "filename": "Manifest.toml"
+                },
+                {
+                    "blank": 3,
+                    "code": 10,
+                    "comment": 0,
+                    "filename": "Project.toml"
+                },
+                {
+                    "blank": 0,
+                    "code": 1,
+                    "comment": 0,
+                    "filename": "README.md"
+                },
+                {
+                    "blank": 23,
+                    "code": 35,
+                    "comment": 0,
+                    "filename": "src\\ALifeBenchmark.jl"
+                },
+                {
+                    "blank": 4,
+                    "code": 17,
+                    "comment": 0,
+                    "filename": "src\\analysis\\selective_factors.jl"
+                },
+                {
+                    "blank": 11,
+                    "code": 37,
+                    "comment": 0,
+                    "filename": "src\\analysis\\statistics.jl"
+                },
+                {
+                    "blank": 21,
+                    "code": 60,
+                    "comment": 0,
+                    "filename": "src\\history\\history.jl"
+                },
+                {
+                    "blank": 9,
+                    "code": 31,
+                    "comment": 0,
+                    "filename": "src\\history\\types.jl"
+                },
+                {
+                    "blank": 7,
+                    "code": 30,
+                    "comment": 0,
+                    "filename": "src\\random_model.jl"
+                },
+                {
+                    "blank": 2,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\config.jl"
+                },
+                {
+                    "blank": 16,
+                    "code": 105,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\instructions\\definitions.jl"
+                },
+                {
+                    "blank": 11,
+                    "code": 51,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\instructions\\implementation.jl"
+                },
+                {
+                    "blank": 0,
+                    "code": 82,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\large_ancestor.jl"
+                },
+                {
+                    "blank": 8,
+                    "code": 21,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\organism\\organism.jl"
+                },
+                {
+                    "blank": 18,
+                    "code": 50,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\organism\\template_search.jl"
+                },
+                {
+                    "blank": 11,
+                    "code": 41,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\show.jl"
+                },
+                {
+                    "blank": 0,
+                    "code": 24,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\small_ancestor.jl"
+                },
+                {
+                    "blank": 6,
+                    "code": 25,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\world\\division.jl"
+                },
+                {
+                    "blank": 8,
+                    "code": 23,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\world\\execution.jl"
+                },
+                {
+                    "blank": 0,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\world\\free_memory_block.jl"
+                },
+                {
+                    "blank": 37,
+                    "code": 111,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\world\\memory.jl"
+                },
+                {
+                    "blank": 3,
+                    "code": 42,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\world\\memory_utils.jl"
+                },
+                {
+                    "blank": 19,
+                    "code": 47,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\world\\tierra_model.jl"
+                },
+                {
+                    "blank": 5,
+                    "code": 16,
+                    "comment": 0,
+                    "filename": "src\\utils\\group_by.jl"
+                },
+                {
+                    "blank": 6,
+                    "code": 16,
+                    "comment": 0,
+                    "filename": "src\\utils\\model.jl"
+                },
+                {
+                    "blank": 8,
+                    "code": 20,
+                    "comment": 0,
+                    "filename": "src\\utils\\organism.jl"
+                },
+                {
+                    "blank": 3,
+                    "code": 8,
+                    "comment": 0,
+                    "filename": "test\\runtests.jl"
+                },
+                {
+                    "blank": 8,
+                    "code": 12,
+                    "comment": 0,
+                    "filename": "test\\test.jl"
+                },
+                {
+                    "blank": 5,
+                    "code": 14,
+                    "comment": 0,
+                    "filename": "test\\Tierra\\ancestor_tests.jl"
+                },
+                {
+                    "blank": 4,
+                    "code": 22,
+                    "comment": 0,
+                    "filename": "test\\Tierra\\instruction_tests.jl"
+                },
+                {
+                    "blank": 25,
+                    "code": 60,
+                    "comment": 0,
+                    "filename": "test\\Tierra\\memory_tests.jl"
+                },
+                {
+                    "blank": 9,
+                    "code": 34,
+                    "comment": 0,
+                    "filename": "test\\Tierra\\memory_utils_tests.jl"
+                }
+            ]
+        },
+        {
+            "version": "0.2.7",
+            "counttime": "2021-06-03 10:15:18",
+            "filesum": 36,
+            "codesum": 1103,
+            "commentsum": 0,
+            "blanksum": 295,
+            "statistics": {
+                ".jl": {
+                    "code": 1042,
+                    "comment": 0,
+                    "blank": 287
+                },
+                ".toml": {
+                    "code": 11,
+                    "comment": 0,
+                    "blank": 4
+                },
+                "": {
+                    "code": 18,
+                    "comment": 0,
+                    "blank": 4
+                },
+                ".md": {
+                    "code": 1,
+                    "comment": 0,
+                    "blank": 0
+                },
+                ".yml": {
+                    "code": 31,
+                    "comment": 0,
+                    "blank": 0
+                }
+            },
+            "filelist": [
+                {
+                    "blank": 0,
+                    "code": 16,
+                    "comment": 0,
+                    "filename": ".github\\workflows\\CompatHelper.yml"
+                },
+                {
+                    "blank": 0,
+                    "code": 15,
+                    "comment": 0,
+                    "filename": ".github\\workflows\\TagBot.yml"
+                },
+                {
+                    "blank": 0,
+                    "code": 1,
+                    "comment": 0,
+                    "filename": ".gitignore"
+                },
+                {
+                    "blank": 4,
+                    "code": 17,
+                    "comment": 0,
+                    "filename": "LICENSE"
+                },
+                {
+                    "blank": 1,
+                    "code": 1,
+                    "comment": 0,
+                    "filename": "Manifest.toml"
+                },
+                {
+                    "blank": 3,
+                    "code": 10,
+                    "comment": 0,
+                    "filename": "Project.toml"
+                },
+                {
+                    "blank": 0,
+                    "code": 1,
+                    "comment": 0,
+                    "filename": "README.md"
+                },
+                {
+                    "blank": 23,
+                    "code": 35,
+                    "comment": 0,
+                    "filename": "src\\ALifeBenchmark.jl"
+                },
+                {
+                    "blank": 4,
+                    "code": 17,
+                    "comment": 0,
+                    "filename": "src\\analysis\\selective_factors.jl"
+                },
+                {
+                    "blank": 11,
+                    "code": 37,
+                    "comment": 0,
+                    "filename": "src\\analysis\\statistics.jl"
+                },
+                {
+                    "blank": 21,
+                    "code": 60,
+                    "comment": 0,
+                    "filename": "src\\history\\history.jl"
+                },
+                {
+                    "blank": 9,
+                    "code": 31,
+                    "comment": 0,
+                    "filename": "src\\history\\types.jl"
+                },
+                {
+                    "blank": 7,
+                    "code": 30,
+                    "comment": 0,
+                    "filename": "src\\random_model.jl"
+                },
+                {
+                    "blank": 2,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\config.jl"
+                },
+                {
+                    "blank": 16,
+                    "code": 105,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\instructions\\definitions.jl"
+                },
+                {
+                    "blank": 11,
+                    "code": 51,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\instructions\\implementation.jl"
+                },
+                {
+                    "blank": 0,
+                    "code": 82,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\large_ancestor.jl"
+                },
+                {
+                    "blank": 8,
+                    "code": 21,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\organism\\organism.jl"
+                },
+                {
+                    "blank": 18,
+                    "code": 50,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\organism\\template_search.jl"
+                },
+                {
+                    "blank": 11,
+                    "code": 41,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\show.jl"
+                },
+                {
+                    "blank": 0,
+                    "code": 24,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\small_ancestor.jl"
+                },
+                {
+                    "blank": 6,
+                    "code": 25,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\world\\division.jl"
+                },
+                {
+                    "blank": 8,
+                    "code": 23,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\world\\execution.jl"
+                },
+                {
+                    "blank": 0,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\world\\free_memory_block.jl"
+                },
+                {
+                    "blank": 37,
+                    "code": 111,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\world\\memory.jl"
+                },
+                {
+                    "blank": 3,
+                    "code": 42,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\world\\memory_utils.jl"
+                },
+                {
+                    "blank": 19,
+                    "code": 47,
+                    "comment": 0,
+                    "filename": "src\\Tierra\\world\\tierra_model.jl"
+                },
+                {
+                    "blank": 5,
+                    "code": 16,
+                    "comment": 0,
+                    "filename": "src\\utils\\group_by.jl"
+                },
+                {
+                    "blank": 6,
+                    "code": 16,
+                    "comment": 0,
+                    "filename": "src\\utils\\model.jl"
+                },
+                {
+                    "blank": 8,
+                    "code": 20,
+                    "comment": 0,
+                    "filename": "src\\utils\\organism.jl"
+                },
+                {
+                    "blank": 3,
+                    "code": 8,
+                    "comment": 0,
+                    "filename": "test\\runtests.jl"
+                },
+                {
+                    "blank": 8,
+                    "code": 12,
+                    "comment": 0,
+                    "filename": "test\\test.jl"
+                },
+                {
+                    "blank": 5,
+                    "code": 14,
+                    "comment": 0,
+                    "filename": "test\\Tierra\\ancestor_tests.jl"
+                },
+                {
+                    "blank": 4,
+                    "code": 22,
+                    "comment": 0,
+                    "filename": "test\\Tierra\\instruction_tests.jl"
+                },
+                {
+                    "blank": 25,
+                    "code": 60,
+                    "comment": 0,
+                    "filename": "test\\Tierra\\memory_tests.jl"
+                },
+                {
+                    "blank": 9,
+                    "code": 34,
+                    "comment": 0,
+                    "filename": "test\\Tierra\\memory_utils_tests.jl"
+                }
+            ]
+        }
+    ]
+}

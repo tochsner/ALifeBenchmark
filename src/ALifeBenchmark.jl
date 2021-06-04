@@ -11,9 +11,11 @@ export get_total_fitness_variance, get_abiotic_variance, get_mutational_variance
 export TierraModel
 export TierrianOrganism
 
-export ANCESTOR, LARGE_ANCESTOR
+export SMALL_ANCESTOR, LARGE_ANCESTOR
 
-export execute_slice!, _perform_instruction!
+export execute_slice!
+
+export log_model
 
 # Analysis
 
@@ -37,6 +39,7 @@ include("tierra/config.jl")
 include("tierra/instructions/definitions.jl")
 
 include("tierra/world/free_memory_block.jl")
+include("tierra/mutations.jl")
 
 include("tierra/organism/organism.jl")
 include("tierra/world/tierra_model.jl")
@@ -54,5 +57,6 @@ include("tierra/small_ancestor.jl")
 include("tierra/large_ancestor.jl")
 
 include("tierra/show.jl")
+include("tierra/logging.jl")
 
 end

@@ -1,4 +1,5 @@
 get_free_memory_size(model::TierraModel) = model.memory_size - model.used_memory
+normalize_address(x) = mod(x, 2^16)
 
 function read_memory(model::TierraModel, address) model.memory[mod(address, model.memory_size) + one(UInt16)] end
 function read_memory(model::TierraModel, address, length) 
@@ -6,10 +7,19 @@ function read_memory(model::TierraModel, address, length)
 end
 function write_memory(model::TierraModel, organism::TierrianOrganism, address, instruction::UInt8)
     if organism_has_access(organism, address, 1)
-        model.memory[mod(address, model.memory_size) + one(UInt16)] = instruction
+        if MUTATE && rand() < FLAW_PROBABILITY
+            model.memory[mod(address, model.memory_size) + one(UInt16)] = get_mutated_instruction(instruction)
+        else
+            model.memory[mod(address, model.memory_size) + one(UInt16)] = instruction
+        end
     else # organism has no write access to this address
         organism.error_flag = true
     end   
+end
+function write_memory(model::TierraModel, organism::TierrianOrganism, start_address, instructions::Vector{UInt8})
+    for (i, instrucion) in enumerate(instructions)
+        write_memory(model, organism, start_address + i - 1, instrucion)
+    end
 end
 
 function organism_has_access(organism::TierrianOrganism, address, length)
@@ -23,6 +33,8 @@ function organism_has_access(organism::TierrianOrganism, address, length)
 end
 
 function clear_memory!(model::TierraModel, start_address, length)
+    length = min(length, model.memory_size - start_address)
+
     # first, we test if there are existing overlapping blocks
 
     for i in 1:Base.length(model.free_blocks)
@@ -119,8 +131,8 @@ function allocate_free_memory!(model::TierraModel, length)
                 model.free_blocks[block_index] = new_free_block
             end
 
-            model.used_memory += length
-            
+            model.used_memory += length            
+
             return alloc_start
         end 
     end
@@ -135,12 +147,12 @@ function _allocate_in_block!(model::TierraModel, block::FreeMemoryBlock, length)
 
     block_start = block.start_address
 
-    if rand(("beginning", "end")) == "beginning"
+    if rand(["beginning", "end"]) == "beginning"
         alloc_start = block_start
         alloc_end = block_start + length
         new_free_block = FreeMemoryBlock(alloc_end, block.length - length)
     else
-        alloc_start = block_start - length + block.length
+        alloc_start = block_start + block.length - length
         new_free_block = FreeMemoryBlock(block_start, block.length - length)
     end
 
