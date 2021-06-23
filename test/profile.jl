@@ -17,15 +17,16 @@ println(get_inherent_variance(history))
 using Profile
 using Printf
 
-model = TierraModel(LARGE_ANCESTOR)
-
 function f()
-    for _ in 1:10_000
+    model = TierraModel(LARGE_ANCESTOR)
+    for _ in 1:1_000_000
         execute_slice!(model)
     end
 end
 
 f()
+
+@time f()
 
 @profile f()
 

@@ -1,13 +1,15 @@
 using DataStructures: Deque
 
 mutable struct TierraModel <: ALifeModel
+    time::UInt64
+
     next_key::UInt64
 
     organism_keys::Vector{UInt64}
     organisms::Dict{UInt64, TierrianOrganism}
 
     slice_index::UInt16
-    
+
     memory::Vector{UInt8}
     memory_size::UInt32
     free_blocks::Vector{FreeMemoryBlock}
@@ -20,22 +22,22 @@ mutable struct TierraModel <: ALifeModel
     end
 
     function TierraModel(ancestor_program::Vector{UInt8})
-        @assert 0 < length(ancestor_program) 
-        
+        @assert 0 < length(ancestor_program)
+
         memory_size = typemax(UInt16) + 1
         memory = zeros(UInt8, memory_size)
-        
+
         ancestor_length = convert(UInt16, length(ancestor_program))
         ancestor_key = 1
-        ancestor = TierrianOrganism(UInt16(0), ancestor_length) 
+        ancestor = TierrianOrganism(UInt16(0), ancestor_length)
         ancestor.key = ancestor_key
         ancestor.hash = bytes2hex(sha256(ancestor_program))
-        
+
         memory[1:ancestor_length] = ancestor_program
         remaining_memory_size = convert(UInt32, memory_size - ancestor_length)
         free_block = FreeMemoryBlock(ancestor_length, remaining_memory_size)
 
-        return new(2, [ancestor_key], Dict(ancestor_key => ancestor), UInt16(1), 
+        return new(0, 2, [ancestor_key], Dict(ancestor_key => ancestor), UInt16(1),
                     memory, memory_size, [free_block], ancestor_length, [ancestor_key])
     end
 end
@@ -53,7 +55,7 @@ function add_organism!(model::TierraModel, program::Vector{UInt8})
     end
 
     new_organism = TierrianOrganism(start_address, length)
-    
+
     add_organism!(model, new_organism)
 
     write_memory(model, new_organism, new_organism.start_address, program)
@@ -73,14 +75,14 @@ end
 
 function remove_organism!(model::TierraModel, key; remove_from_reaper_queue = true)
     organism_to_be_removed = model.organisms[key]
-    
+
     clear_memory!(model, organism_to_be_removed.start_address, organism_to_be_removed.length)
     if organism_to_be_removed.has_daughter
         clear_memory!(model, organism_to_be_removed.daughter_address, organism_to_be_removed.daughter_length)
     end
-    
+
     delete!(model.organisms, key)
-    deleteat!(model.organism_keys, indexin([key], model.organism_keys))
+    delete!(model.organism_keys, key)
 
     if remove_from_reaper_queue
         delete!(model.reaper_queue, key)

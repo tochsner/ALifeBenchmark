@@ -16,6 +16,8 @@ function execute_slice!(model::TierraModel; slice_size = SLICE_SIZE)
 end
 
 function _perform_instruction!(model::TierraModel, organism::TierrianOrganism)
+    model.time += 1
+
     instruction_address = _address_within(organism, organism.ip)
     organism.ip = _address_within(organism, organism.ip + one(UInt16))
 
