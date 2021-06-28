@@ -1,9 +1,9 @@
-const MUTATE = false
+const MUTATE = true
 const COSMIC_RAYS_PROBABILITY = 1e-9
 const FLAW_PROBABILITY = 1e-4
 
 const NUM_THREADS = 4
-const SLICE_SIZE = 5
+const SLICE_SIZE = 10
 
 const MAX_SEARCH_DISTANCE = 256
 const MAX_TEMPLATE_LENGTH = 16
@@ -12,8 +12,3 @@ const MIN_DAUGHTER_SIZE = 8
 const MAX_DAUGHTER_GROWTH = 4
 
 const MAX_MEMORY_CAPACITY = 0.5
-
-const LOG_FILE = "log.txt"
-const SNAPSHOTS_FOLDER = "snapshots/t"
-
-const LOG_PROBABILITY = 1e-2

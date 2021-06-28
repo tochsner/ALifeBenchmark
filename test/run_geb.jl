@@ -84,4 +84,4 @@ function run(m, n)
     end
 end
 
-run(100, 5000)
+run(100, 0)

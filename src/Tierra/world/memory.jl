@@ -204,7 +204,7 @@ function allocate_free_memory!(model::TierraModel, length)
 end
 
 function _allocate_in_block!(model::TierraModel, block::FreeMemoryBlock, length)
-    if block.length == length
+    if block.length == length        
         return block.start_address, nothing
     end
 
@@ -219,5 +219,5 @@ function _allocate_in_block!(model::TierraModel, block::FreeMemoryBlock, length)
         new_free_block = FreeMemoryBlock(block_start, block.length - length)
     end
 
-    return alloc_start, new_free_block
+    return UInt16(alloc_start), new_free_block
 end

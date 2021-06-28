@@ -1,12 +1,22 @@
 module ALifeBenchmark
 
-export RandomModel
-export run_simulation
+# export RandomModel
+# export run_simulation
+# 
+# export History
+# export get_default_history, get_detailed_history, get_by_environment
+# 
+# export get_total_fitness_variance, get_abiotic_variance, get_mutational_variance, get_biotic_variance, get_inherent_variance
 
-export History
-export get_default_history, get_detailed_history, get_by_environment
 
-export get_total_fitness_variance, get_abiotic_variance, get_mutational_variance, get_biotic_variance, get_inherent_variance
+export load_collected_data, save_calculated
+
+export get_genotype
+
+export get_phenotype_similarity, get_most_frequent_genotypes, get_reachable_diversity
+export get_reachable_fitness
+
+
 
 # Tierra
 
@@ -17,7 +27,10 @@ export SMALL_ANCESTOR, LARGE_ANCESTOR
 
 export execute_slice!
 
-export log_model
+export collect_distribution
+
+export print_program
+
 
 # Geb
 
@@ -31,16 +44,32 @@ export execute!
 
 include("utils/organism.jl")
 
-include("history/types.jl")
-include("history/history.jl")
+# include("history/types.jl")
+# include("history/history.jl")# 
 
-include("utils/group_by.jl")
+# include("utils/group_by.jl")# 
 
-include("utils/model.jl")
-include("random_model.jl")
+# include("utils/model.jl")
+# include("random_model.jl")# 
 
-include("analysis/statistics.jl")
-include("analysis/selective_factors.jl")
+# include("analysis/statistics.jl")
+# include("analysis/selective_factors.jl")
+
+include("analysis/config.jl")
+
+include("logging/collect_distribution.jl")
+include("logging/logger.jl")
+include("logging/run_logger.jl")
+
+include("analysis/collected_data.jl")
+include("analysis/sample_distributions.jl")
+include("analysis/genotype_occurances.jl")
+
+include("analysis/phenotype_similarity.jl")
+include("analysis/reachable_diversity.jl")
+include("analysis/reachable_fitness.jl")
+
+
 
 # Tierra
 
@@ -56,6 +85,8 @@ include("tierra/mutations.jl")
 include("tierra/organism/organism.jl")
 include("tierra/world/tierra_model.jl")
 
+include("tierra/statistics/statistic_model.jl")
+
 include("tierra/world/memory_utils.jl")
 include("tierra/world/memory.jl")
 include("tierra/world/division.jl")
@@ -70,6 +101,7 @@ include("tierra/large_ancestor.jl")
 
 include("tierra/show.jl")
 include("tierra/logging.jl")
+
 
 # Geb
 

@@ -1,6 +1,10 @@
 import Base.Threads.@threads
 
 function execute_slice!(model::TierraModel; slice_size = SLICE_SIZE)
+    if model.time == 0
+        log_birth(model.logger, model, model.organisms[1])
+    end
+
     model.slice_index = mod(model.slice_index, length(model.organism_keys)) + 1
 
     organism = model.organisms[model.organism_keys[model.slice_index]]
@@ -13,10 +17,13 @@ function execute_slice!(model::TierraModel; slice_size = SLICE_SIZE)
     if MUTATE
         _apply_cosmic_rays!(model)
     end
+
+    log_step(model.logger, model)
 end
 
 function _perform_instruction!(model::TierraModel, organism::TierrianOrganism)
     model.time += 1
+    organism.age += 1
 
     instruction_address = _address_within(organism, organism.ip)
     organism.ip = _address_within(organism, organism.ip + one(UInt16))

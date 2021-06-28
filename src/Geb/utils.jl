@@ -1,4 +1,4 @@
-function delete!(array::Vector{T}, element::T) where {T}
+function Base.delete!(array::Vector{T}, element::T) where {T}
     deleteat!(array, indexin([element], array))
 end
 

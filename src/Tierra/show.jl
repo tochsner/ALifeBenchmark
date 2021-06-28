@@ -53,3 +53,10 @@ end
 function Base.show(io::IO, free_block::FreeMemoryBlock)
     @printf(io, "%16i \t %16i \n", free_block.start_address, free_block.length)
 end
+
+function print_program(program::Vector{UInt8})
+    for instruction_int in program
+        instruction = convert_instruction(instruction_int)
+        println(instruction)
+    end
+end

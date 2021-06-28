@@ -25,8 +25,13 @@ mutable struct TierrianOrganism
     hash::String
     parent_hash::String
 
+    daughters::Vector{TierrianOrganism}
+
+    time_birth::UInt64
+    age::UInt16
+
     function TierrianOrganism(start_address::UInt16, length::UInt16)
-        new(0, 0, 0, 0, 0, CircularBuffer{UInt16}(10), start_address, false, start_address, length, false, 0, 0, "", "")
+        new(0, 0, 0, 0, 0, CircularBuffer{UInt16}(10), start_address, false, start_address, length, false, 0, 0, "", "", [], 0, 0)
     end
 end
 

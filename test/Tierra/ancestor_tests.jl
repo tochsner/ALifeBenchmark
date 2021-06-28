@@ -1,4 +1,6 @@
-@testset "Ancestor Tests" begin    
+@testset "Ancestor Tests" begin
+    @assert ALifeBenchmark.MUTATE == false
+    
     model = ALifeBenchmark.TierraModel(ALifeBenchmark.LARGE_ANCESTOR)
 
     for _ in 1:900

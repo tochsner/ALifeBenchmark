@@ -35,8 +35,11 @@ function divide(model::TierraModel, organism::TierrianOrganism)
 
     daughter = TierrianOrganism(organism.daughter_address, organism.daughter_length)
     add_organism!(model, daughter)
+    daughter.parent_hash = organism.hash
     set_hash!(daughter, model)
-    daughter.parent_hash = organism.hash    
+
+    log_birth(model.logger, model, daughter, organism)
 
     organism.has_daughter = false
+    push!(organism.daughters, organism)
 end
