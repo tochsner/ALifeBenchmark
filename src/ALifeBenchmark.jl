@@ -11,12 +11,14 @@ module ALifeBenchmark
 
 export load_collected_data, save_calculated
 
-export get_genotype
+export get_genotype, get_snapshot_ids
 
 export get_phenotype_similarity, get_most_frequent_genotypes, get_reachable_diversity
-export get_reachable_fitness
+export get_reachable_fitness, get_snapshot, get_T_similarity, get_evolutionary_potential
+export get_adaption_of_genotype, get_adaption_of_snapshot
 
 
+export _wasserstein, get_genotype_distribution
 
 # Tierra
 
@@ -61,13 +63,19 @@ include("logging/collect_distribution.jl")
 include("logging/logger.jl")
 include("logging/run_logger.jl")
 
+
 include("analysis/collected_data.jl")
 include("analysis/sample_distributions.jl")
 include("analysis/genotype_occurances.jl")
 
+include("analysis/estimator.jl")
+
 include("analysis/phenotype_similarity.jl")
 include("analysis/reachable_diversity.jl")
 include("analysis/reachable_fitness.jl")
+include("analysis/T_similarity.jl")
+include("analysis/evolutionary_potential.jl")
+include("analysis/level_of_adaption.jl")
 
 
 

@@ -1,3 +1,5 @@
+using Statistics: mean
+
 struct ReachableDiversityLogger <: Logger
     original_organisms_alive::Vector{UInt64}
     child_genotypes::Vector{Tuple}
@@ -7,64 +9,45 @@ struct ReachableDiversityLogger <: Logger
     end
 end
 
-function get_reachable_diversity(data::CollectedData, num_results::Integer, rel_tolerance = 0.005)
+function get_reachable_diversity(data::CollectedData, num_results::Integer, rel_tolerance, min_samples, max_samples)
     results = []
     
     for snapshot_id in sample_snapshot_ids(data, num_results)
-        push!(results, (snapshot_id, get_reachable_diversity(data, snapshot_id, rel_tolerance)))
+        push!(results, (snapshot_id, get_reachable_diversity(data, snapshot_id, rel_tolerance, min_samples, max_samples)))
         save_calculated(data)
     end
 
     return results
 end
 
-function get_reachable_diversity(data::CollectedData, snapshot_id::String, rel_tolerance = 0.005)
-    children = collect_child_genotypes(data, snapshot_id)
-    return get_reachable_diversity(data, children, rel_tolerance)
-end
+function get_reachable_diversity(data::CollectedData, snapshot_id::String, rel_tolerance, min_samples, max_samples)
+    snapshot = get_snapshot(data, snapshot_id)
 
-function get_reachable_diversity(data::CollectedData, children::Vector, rel_tolerance = 0.005, min_samples = 1, max_samples = 500)
-    num_children = length(children)
-
-    index_pairs = [(i, j) for i in 1:num_children for j in 1:num_children]
-    shuffle!(index_pairs)
-
-    reachable_diversity = 0
-    num_samples = 0
-    rel_change = 2*rel_tolerance
-
-    for (index_1, index_2) in index_pairs
-        if (min_samples <= num_samples && rel_change < rel_tolerance) || max_samples <= num_samples
-            break
-        end
-
-        genotype_1_id, genotype_1 = children[index_1]
-        genotype_2_id, genotype_2 = children[index_2]
+    reachable_diversity = estimate(rel_tolerance, min_samples, max_samples, print_progress = true) do
+        logger = ReachableDiversityLogger(snapshot)
+        run_until(snapshot, should_terminate, logger)
         
-        if genotype_1_id == genotype_2_id
-            continue
+        while length(logger.child_genotypes) < 2
+            logger = ReachableDiversityLogger(snapshot)
+            run_until(snapshot, should_terminate, logger)
         end
 
-        old_diversity = reachable_diversity
-        phenotype_similarity = get_phenotype_similarity(data, genotype_1_id, genotype_2_id, genotype_1, genotype_2, rel_tolerance = 0.01)
-        reachable_diversity = (reachable_diversity*num_samples + phenotype_similarity) / (num_samples + 1)
+        println(length(logger.child_genotypes))
+        
+        sum_phenotype_similarities = 0
+        num_samples_per_run = 10
 
-        rel_change = abs(old_diversity - reachable_diversity) / max(EPS, old_diversity)
-        num_samples += 1
+        for _ in 1:num_samples_per_run
+            (genotype_1_id, genotype_1) = rand(logger.child_genotypes)
+            (genotype_2_id, genotype_2) = rand(logger.child_genotypes)
 
-        println(num_samples, " ", rel_change, " ", reachable_diversity)
+            sum_phenotype_similarities += get_phenotype_similarity(data, genotype_1_id, genotype_2_id, genotype_1, genotype_2, rel_tolerance = 0.01)
+        end
+
+        return sum_phenotype_similarities / num_samples_per_run
     end
 
     return reachable_diversity
-end
-
-function collect_child_genotypes(data::CollectedData, snapshot_id)
-    snapshot = get_snapshot(data, snapshot_id)
-
-    logger = ReachableDiversityLogger(snapshot)
-    run_until(snapshot, should_terminate, logger)
-    
-    return logger.child_genotypes
 end
 
 should_terminate(logger::ReachableDiversityLogger, snapshot) = length(logger.original_organisms_alive) == 0
@@ -73,7 +56,12 @@ function log_step(::ReachableDiversityLogger, model) end
 function save_log(::ReachableDiversityLogger) end
 
 function log_birth(logger::ReachableDiversityLogger, model, child, parent=nothing)
-    push!(logger.child_genotypes, (get_genotype_id(model, child), get_genotype(model, child)))
+    child_genotype_id = get_genotype_id(model, child)
+    parent_genotype_id = get_genotype_id(model, parent)
+
+    if child_genotype_id != parent_genotype_id
+        push!(logger.child_genotypes, (get_genotype_id(model, child), get_genotype(model, child)))
+    end
 end
 
 function log_death(logger::ReachableDiversityLogger, model, organism)

@@ -4,11 +4,15 @@ authors = ["Tobia Ochsner <tobia.ochnser@hotmail.com> and contributors"]
 version = "0.1.0"
 
 [deps]
+Distances = "b4f34e82-e78d-54a5-968a-f98e89d6e8f7"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 Graphics = "a2bd30eb-e257-5431-a919-1863eab51364"
 Gtk = "4c0ca9eb-093a-5379-98c5-f87ac0bbbf44"
+OptimalTransport = "7e02d93a-ae51-4f58-b602-d97af76e3b33"
 ProfileView = "c46f51b8-102a-5cf2-8d2c-8597cb0e0da7"
 StatProfilerHTML = "a8a75453-ed82-57c9-9e16-4cd1196ecbf5"
+StringDistances = "88034a9c-02f8-509d-84a9-84ec65e18404"
 
 [compat]
 julia = "1"

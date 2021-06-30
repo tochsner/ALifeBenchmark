@@ -6,7 +6,7 @@ end
 struct TierrianEnvironment <: Environment end
 
 get_time(tierrian_model::TierraModel) = tierrian_model.time
-get_organisms(tierrian_model::TierraModel) = values(tierrian_model.organisms)
+get_organisms(tierrian_model::TierraModel) = [o for o in values(tierrian_model.organisms)]
 get_organism_ids(tierrian_model::TierraModel) = [o.key for o in values(tierrian_model.organisms)]
 
 function get_id(::TierraModel, tierrian_organism::TierrianOrganism)
@@ -67,20 +67,20 @@ function get_daughters(model::TierraModel, abstracted_organism_to_replace::Organ
 end
 
 function get_fitness(model::TierraModel, abstracted_organism_to_replace::Organism, new_program::Vector{UInt8})    
-    new_organism = run_simulation(model, abstracted_organism_to_replace, new_program)
+    get_fitness(model, abstracted_organism_to_replace.id, new_program)
+end
+
+function get_fitness(model::TierraModel, key_to_replace::UInt64, new_program::Vector{UInt8})    
+    new_organism = run_simulation(model, key_to_replace, new_program)
 
     fitness = get_fitness(model, new_organism)
 
     return fitness
 end
 
-function run_simulation(model::TierraModel, abstracted_organism_to_replace::Organism, new_program::Vector{UInt8})
-    model = deepcopy(model)
-    model.logger = DoNothingLogger()
-    
+function replace_organism!(model::TierraModel, key::UInt64, new_program::Vector{UInt8})    
     # remove old organism first
 
-    key = UInt64(abstracted_organism_to_replace.id)
     remove_organism!(model, key)
 
     # add new organism
@@ -88,6 +88,20 @@ function run_simulation(model::TierraModel, abstracted_organism_to_replace::Orga
 
     new_key = add_organism!(model, new_program)
     new_organism = model.organisms[new_key]
+
+    return new_organism
+end
+
+function run_simulation(model::TierraModel, abstracted_organism_to_replace::Organism, new_program::Vector{UInt8})
+    run_simulation(model, abstracted_organism_to_replace.id, new_program)
+end
+
+function run_simulation(model::TierraModel, key_to_replace::UInt64, new_program::Vector{UInt8})
+    model = deepcopy(model)
+    model.logger = DoNothingLogger()
+
+    new_organism = replace_organism!(model, key_to_replace, new_program)
+    new_key = new_organism.key
 
     # run simulation until death of the new organism
 
@@ -103,6 +117,17 @@ function run_until(model::TierraModel, termination_predicate, logger=DoNothingLo
     model.logger = logger
 
     while termination_predicate(logger, model) == false
+        execute_slice!(model)
+    end
+
+    return model
+end
+
+function run_n_timesteps(model::TierraModel, n_timesteps, logger=DoNothingLogger())
+    model = deepcopy(model)
+    model.logger = logger
+
+    for _ in 1:convert(UInt64, floor(n_timesteps / SLICE_SIZE))
         execute_slice!(model)
     end
 

@@ -94,6 +94,20 @@ function get_snapshot_ids(data::CollectedData)
     return snapshot_ids
 end
 
+function get_snapshot_ids(data::CollectedData, trial_id::String)
+    snapshot_ids = []
+
+    for filename in readdir(SNAPSHOTS_FOLDER)
+        current_trial_id, snapshot_id = split(filename, "_")
+        
+        if current_trial_id == trial_id
+            push!(snapshot_ids, string(snapshot_id))
+        end
+    end
+
+    return snapshot_ids
+end
+
 function save_calculated(data::CollectedData)
     serialize(CALCULATED_FOLDER * "phenotype_similarites", data.phenotype_similarities)
 end

@@ -18,7 +18,7 @@ data = load_collected_data()
 # println("-" ^ 10)
 # println("Most Frequent")
 # 
-# get_most_frequent_genotypes(data, 500)
+get_most_frequent_genotypes(data, 10)
 # 
 # println("Calculate Phenotype Similarity...")
 
@@ -28,10 +28,39 @@ data = load_collected_data()
 # 
 # println(similarity)
 
-snapshot_1 = "97693929022999"
 
-similarity = get_reachable_fitness(data, 200)
 
-println(similarity)
+# Random.seed!(0)
+
+using StringDistances: Levenshtein
+
+trial_id = "74031389094700"
+
+snapshot_ids = get_snapshot_ids(data, trial_id)
+
+last_snaphot_id = snapshot_ids[end]
+last_snapshot = get_snapshot(data, last_snaphot_id)
+last_distribution = get_genotype_distribution(last_snapshot)
+
+for snapshot_id in snapshot_ids
+    snapshot = get_snapshot(data, snapshot_id)
+
+    distribution = get_genotype_distribution(snapshot)
+    distance = _wasserstein(last_distribution, distribution, Levenshtein())
+    
+    println(snapshot_id, " ", distance)
+end
+
+# snapshot_1 = "85527776840800"
+# snapshot_2 = "97916520365199"
+# 
+# snapshot_1 = get_snapshot(data, snapshot_1)
+# snapshot_2 = get_snapshot(data, snapshot_2)
+# 
+# println(get_adaption_of_snapshot(data, "83280182507199", "83280182507199", 0.01, 5, 100))
+# 
+# println(get_T_similarity(snapshot_1, snapshot_2, 10_000_000, 0.1, 20, 25))
+
+# println(get_reachable_fitness(data, 100, 0.005, 50, 500))
 
 save_calculated(data)

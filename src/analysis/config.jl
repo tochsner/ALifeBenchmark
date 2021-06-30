@@ -4,7 +4,7 @@ const LOGGER_FOLDER = "tierra_logs/logs/"
 
 const CALCULATED_FOLDER = "tierra_logs/calculated/"
 
-const LOG_PROBABILITY = 1e-6
+const LOG_PROBABILITY = 1e-5
 
 const NUM_THREADS = 4
 
