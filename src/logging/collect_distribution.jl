@@ -15,7 +15,5 @@ function collect_distribution(model_creator, step_function, print_function, num_
         end
 
         save_log(logger)
-
-        println(model)
     end
 end

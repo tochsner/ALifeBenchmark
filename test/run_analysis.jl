@@ -34,7 +34,7 @@ get_most_frequent_genotypes(data, 10)
 
 using StringDistances: Levenshtein
 
-trial_id = "166253449886900"
+trial_id = "177598926163100"
 
 snapshot_ids = get_snapshot_ids(data, trial_id)
 

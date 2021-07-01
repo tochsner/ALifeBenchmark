@@ -20,6 +20,7 @@ function load_collected_data()
     data = CollectedData()
 
     for trial_id in get_trials()
+        println(trial_id)
         push!(data.trial_ids, trial_id)
         add_logged_organisms(data, trial_id)
         println("Loaded ", trial_id, " (Total ", length(data.logged_organisms), " organisms logged)")
@@ -33,21 +34,31 @@ function load_collected_data()
 end
 
 function get_trials()
-    [t for t in readdir(LOGGER_FOLDER) if occursin("compact", t) == false && isfile(LOGGER_FOLDER * t)]
+    unique([split(t, "_")[1] for t in readdir(LOGGER_FOLDER) if occursin("compact", t) == false && isfile(LOGGER_FOLDER * t)])
 end
 
 function add_logged_organisms(data::CollectedData, trial_id)
     if isfile(LOGGER_FOLDER * trial_id * "compact")
-        logger = deserialize(LOGGER_FOLDER * trial_id * "compact")
+        logged_organisms = deserialize(LOGGER_FOLDER * trial_id * "compact")
+        append!(data.logged_organisms, logged_organisms)
     else
-        logger = deserialize(LOGGER_FOLDER * trial_id)
-        logger.logged_organisms_dead = [o for o in values(logger.logged_organisms_dead) if o.snapshot_id != "-1"]
-        logger.logged_organisms_alive = [o for o in values(logger.logged_organisms_alive) if o.snapshot_id != "-1"]
-        serialize(LOGGER_FOLDER * trial_id * "compact", logger)
-    end
+        logged_organisms = []
 
-    append!(data.logged_organisms, logger.logged_organisms_dead)
-    append!(data.logged_organisms, logger.logged_organisms_alive)
+        for file in readdir(LOGGER_FOLDER)
+            if occursin("compact", file) || isfile(LOGGER_FOLDER * file) == false continue end
+            
+            current_trial_id = split(trial_id, "_")[1]
+            if current_trial_id != trial_id continue end
+    
+            logger = deserialize(LOGGER_FOLDER * file)
+            println(length(logger.logged_organisms_dead))
+            append!(logged_organisms, [o for o in values(logger.logged_organisms_dead) if o.snapshot_id != "-1"])
+        end
+
+        serialize(LOGGER_FOLDER * trial_id * "compact", logged_organisms)
+
+        append!(data.logged_organisms, logged_organisms)
+    end
 end
 
 function get_genotype(data::CollectedData, genotype_id)
