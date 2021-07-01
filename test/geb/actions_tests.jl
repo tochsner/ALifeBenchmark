@@ -192,7 +192,6 @@ end
 
     ALifeBenchmark.perform!(model, organism_11)
 
-    # we expect a move forward by 0.2805599027529448 and a turn by 0.47396039581497
     @test organism_11.coordinates == (0.5 + 0.2805599027529448, 0.5)
-    @test organism_11.direction == 170
+    @test organism_11.direction == 277
 end
