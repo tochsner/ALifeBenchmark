@@ -41,6 +41,25 @@ end
 
 function Base.show(io::IO, model::TierraModel)
     println(io, "-"^50)
+
+    hash_count = Dict()
+
+    for key in model.organism_keys
+        hash = model.organisms[key].hash
+    
+        if haskey(hash_count, hash)
+            hash_count[hash] += 1
+        else
+            hash_count[hash] = 1
+        end
+    end
+
+    for (hash, count) in hash_count
+        println(io, hash, ":\t ", count)
+    end
+
+    return
+
     for key in model.organism_keys[1:min(length(model.organism_keys), 5)]
         print(key)
         organism = model.organisms[key]

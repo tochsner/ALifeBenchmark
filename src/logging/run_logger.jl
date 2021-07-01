@@ -26,17 +26,8 @@ function log_step(logger::RunLogger, model)
 end
 
 function save_log(logger::RunLogger)    
-    path = LOGGER_FOLDER * logger.trial_id
-
-    if isfile(path)
-        saved_logger = Serialization.deserialize(path)
-        merge!(saved_logger.logged_organisms_dead, logger.logged_organisms_dead)
-        saved_logger.logged_organisms_alive = logger.logged_organisms_alive
-        Serialization.serialize(path, saved_logger)
-    else
-        Serialization.serialize(path, logger)
-    end
-
+    path = LOGGER_FOLDER * logger.trial_id * "_" * string(time_ns())
+    Serialization.serialize(path, logger)
     logger.logged_organisms_dead = Dict()
 end
 

@@ -4,7 +4,7 @@ function collect_distribution(model_creator, step_function, print_function, num_
     for t in 1:num_trials
         trial_id = time_ns()
 
-        Random.seed!(1)
+        Random.seed!(trial_id)
 
         logger = RunLogger(trial_id)
         model = model_creator(logger)
@@ -15,5 +15,7 @@ function collect_distribution(model_creator, step_function, print_function, num_
         end
 
         save_log(logger)
+
+        println(model)
     end
 end
