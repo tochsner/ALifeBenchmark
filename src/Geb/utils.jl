@@ -6,9 +6,14 @@ function deleteif!(array::Array{T, N}, predicate) where {T, N}
     deleteat!(array, findall(predicate, array))
 end
 
-function clear!(array)
+function clear!(array::Array)
     for i in length(array):-1:1
         deleteat!(array, i)
+    end
+end
+function clear!(dict::Dict)
+    for key in unique(keys(dict))
+        delete!(dict, key)
     end
 end
 

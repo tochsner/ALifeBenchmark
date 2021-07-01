@@ -33,7 +33,7 @@ function load_collected_data()
 end
 
 function get_trials()
-    [t for t in readdir(LOGGER_FOLDER) if occursin("compact", t) == false]
+    [t for t in readdir(LOGGER_FOLDER) if occursin("compact", t) == false && isfile(LOGGER_FOLDER * t)]
 end
 
 function add_logged_organisms(data::CollectedData, trial_id)
@@ -41,11 +41,13 @@ function add_logged_organisms(data::CollectedData, trial_id)
         logger = deserialize(LOGGER_FOLDER * trial_id * "compact")
     else
         logger = deserialize(LOGGER_FOLDER * trial_id)
-        logger.logged_organisms = [o for o in values(logger.logged_organisms) if o.snapshot_id != "-1"]
+        logger.logged_organisms_dead = [o for o in values(logger.logged_organisms_dead) if o.snapshot_id != "-1"]
+        logger.logged_organisms_alive = [o for o in values(logger.logged_organisms_alive) if o.snapshot_id != "-1"]
         serialize(LOGGER_FOLDER * trial_id * "compact", logger)
     end
 
-    append!(data.logged_organisms, logger.logged_organisms)
+    append!(data.logged_organisms, logger.logged_organisms_dead)
+    append!(data.logged_organisms, logger.logged_organisms_alive)
 end
 
 function get_genotype(data::CollectedData, genotype_id)

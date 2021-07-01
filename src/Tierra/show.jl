@@ -41,8 +41,6 @@ end
 
 function Base.show(io::IO, model::TierraModel)
     println(io, "-"^50)
-    print(model.free_blocks)
-    println(io, "-"^50)
     for key in model.organism_keys[1:min(length(model.organism_keys), 5)]
         print(key)
         organism = model.organisms[key]

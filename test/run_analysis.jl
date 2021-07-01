@@ -34,7 +34,7 @@ get_most_frequent_genotypes(data, 10)
 
 using StringDistances: Levenshtein
 
-trial_id = "74031389094700"
+trial_id = "166253449886900"
 
 snapshot_ids = get_snapshot_ids(data, trial_id)
 
@@ -48,7 +48,7 @@ for snapshot_id in snapshot_ids
     distribution = get_genotype_distribution(snapshot)
     distance = _wasserstein(last_distribution, distribution, Levenshtein())
     
-    println(snapshot_id, " ", distance)
+    println(snapshot_id, " ", distance, " ", snapshot.time)
 end
 
 # snapshot_1 = "85527776840800"
