@@ -15,6 +15,7 @@ StatProfilerHTML = "a8a75453-ed82-57c9-9e16-4cd1196ecbf5"
 StringDistances = "88034a9c-02f8-509d-84a9-84ec65e18404"
 
 [compat]
+OptimalTransport = "0.3"
 julia = "1"
 
 [extras]
