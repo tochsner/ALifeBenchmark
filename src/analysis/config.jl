@@ -1,8 +1,10 @@
-const SNAPSHOTS_FOLDER = "geb_logs/snapshots/"
-const GENOTYPE_FOLDER = "geb_logs/genotypes/"
-const LOGGER_FOLDER = "geb_logs/logs/"
+const GENERAL_FOLDER = "geb_logs"
 
-const CALCULATED_FOLDER = "geb_logs/calculated/"
+const SNAPSHOTS_FOLDER = GENERAL_FOLDER * "/snapshots/"
+const GENOTYPE_FOLDER = GENERAL_FOLDER * "/genotypes/"
+const LOGGER_FOLDER = GENERAL_FOLDER * "/logs/"
+
+const CALCULATED_FOLDER = GENERAL_FOLDER * "/calculated/"
 
 const LOG_PROBABILITY = 1e-3 # 5e-7
 
