@@ -26,7 +26,7 @@ end
 function get_reachable_fitness(data::CollectedData, snapshot_id::String, rel_tolerance, min_samples, max_samples)
     snapshot = get_snapshot(data, snapshot_id)
 
-    reachable_fitness = estimate(rel_tolerance, min_samples, max_samples) do
+    reachable_fitness = estimate(rel_tolerance, min_samples, max_samples, print_progress=false) do
         reachable_fitness = 0
 
         logger = ReachableFitnessLogger(snapshot)
@@ -47,7 +47,6 @@ function get_reachable_fitness(data::CollectedData, snapshot_id::String, rel_tol
 
             
             if fitness_parent < fitness_child
-            #    num_beneficial += fitness_child / max(EPS, fitness_parent)
                 num_beneficial += 1
             end
         end

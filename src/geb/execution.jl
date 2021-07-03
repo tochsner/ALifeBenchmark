@@ -1,6 +1,12 @@
 using Random
 
 function execute!(model::GebModel)
+    if model.time == 0
+        for organism in model.organisms
+            log_birth(model.logger, model, organism)
+        end
+    end
+
     shuffle(model.organisms)
 
     for index in 1:length(model.organisms)
@@ -14,5 +20,11 @@ function execute!(model::GebModel)
 
         update_inputs!(model, organism)
         perform!(model, organism)
+
+        organism.age += 1
     end
+
+    model.time += 1
+
+    log_step(model.logger, model)
 end

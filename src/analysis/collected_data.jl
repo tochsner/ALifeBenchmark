@@ -20,7 +20,6 @@ function load_collected_data()
     data = CollectedData()
 
     for trial_id in get_trials()
-        println(trial_id)
         push!(data.trial_ids, trial_id)
         add_logged_organisms(data, trial_id)
         println("Loaded ", trial_id, " (Total ", length(data.logged_organisms), " organisms logged)")
@@ -51,7 +50,6 @@ function add_logged_organisms(data::CollectedData, trial_id)
             if current_trial_id != trial_id continue end
     
             logger = deserialize(LOGGER_FOLDER * file)
-            println(length(logger.logged_organisms_dead))
             append!(logged_organisms, [o for o in values(logger.logged_organisms_dead) if o.snapshot_id != "-1"])
         end
 

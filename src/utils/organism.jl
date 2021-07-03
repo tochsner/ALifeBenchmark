@@ -10,7 +10,7 @@ mutable struct Organism{P <: Position, E <: Environment}
     id::UInt64
     
     genotype_id::String
-    parent_id::UInt64
+    parent_id::Union{UInt64, Vector{UInt64}}
     
     position::P
     environment::E

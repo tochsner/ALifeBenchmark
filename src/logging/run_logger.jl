@@ -35,7 +35,7 @@ function log_birth(logger::RunLogger, model, child, parent=nothing)
     time = get_time(model)
     
     if parent === nothing
-        parent_id = 0
+        parent_id = UInt64(0)
     else
         parent_id = get_id(model, parent)        
     end

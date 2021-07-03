@@ -136,6 +136,8 @@ include("geb/organism/input_routing.jl")
 
 include("geb/execution.jl")
 
+include("geb/statistics/statistic_model.jl")
+
 include("geb/show.jl")
 
 end

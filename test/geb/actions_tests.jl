@@ -96,13 +96,13 @@ end
     organism_11.direction = 0
 
     ALifeBenchmark.perform!(ALifeBenchmark.TurnClockwise(), model, organism_11, 20/360)
-    @test organism_11.direction == 20
+    @test organism_11.direction == 3
     ALifeBenchmark.perform!(ALifeBenchmark.TurnClockwise(), model, organism_11, 350/360)
-    @test organism_11.direction == 10
+    @test organism_11.direction == 61
     ALifeBenchmark.perform!(ALifeBenchmark.TurnAntiClockwise(), model, organism_11, 40/360)
-    @test organism_11.direction == 330
+    @test organism_11.direction == 54
     ALifeBenchmark.perform!(ALifeBenchmark.TurnAntiClockwise(), model, organism_11, 100/360)
-    @test organism_11.direction == 230
+    @test organism_11.direction == 37
 end
 
 @testset "Moving Test" begin
@@ -193,5 +193,5 @@ end
     ALifeBenchmark.perform!(model, organism_11)
 
     @test organism_11.coordinates == (0.5 + 0.2805599027529448, 0.5)
-    @test organism_11.direction == 277
+    @test organism_11.direction == 346
 end

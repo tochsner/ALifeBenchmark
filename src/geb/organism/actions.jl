@@ -72,12 +72,33 @@ function perform!(::CrossOver, model::GebModel, parent_1::GebOrganism, activatio
     if _get_organism_behind(model, parent_1) === nothing
         x_child_grid, y_child_grid = _get_cell_in_direction(model, parent_1.coordinates, 360 - parent_1.direction)
 
-        child = GebOrganism(child_genotype, (x_child_grid - 0.5, y_child_grid - 0.5))
+        child = GebOrganism(child_genotype, 
+                            (x_child_grid - 0.5, y_child_grid - 0.5),
+                            parent_1.genotype, 
+                            parent_2.genotype,
+                            model.time)
+        
+        push!(parent_1.daughters, child)
+        push!(parent_2.daughters, child)
+
         add_organism!(model, child)
+
+        log_birth(model.logger, model, child, [parent_1, parent_2])
     else
-        child = GebOrganism(child_genotype, parent_2.coordinates)
+        child = GebOrganism(child_genotype, 
+        parent_2.coordinates,
+        parent_1.genotype, 
+        parent_2.genotype,
+        model.time)
+        
+        push!(parent_1.daughters, child)
+        push!(parent_2.daughters, child)
+        
         kill!(model, parent_2)
+        
         add_organism!(model, child)
+        
+        log_birth(model.logger, model, child, [parent_1, parent_2])
     end
 end
 
@@ -92,10 +113,10 @@ function perform!(::Fight, model::GebModel, fighter::GebOrganism, activation)
 end
 
 function perform!(::TurnAntiClockwise, ::GebModel, organism::GebOrganism, angle)
-    organism.direction = mod(organism.direction - Int(round(360*angle)), 360)
+    organism.direction = mod(organism.direction - min(MAX_TURN, Int(round(MAX_TURN*angle))), 360)
 end
 function perform!(::TurnClockwise, ::GebModel, organism::GebOrganism, angle)
-    organism.direction = mod(organism.direction + Int(round(360*angle)), 360)
+    organism.direction = mod(organism.direction + min(MAX_TURN, Int(round(MAX_TURN*angle))), 360)
 end
 
 function perform!(::MoveForward, model::GebModel, organism::GebOrganism, distance)

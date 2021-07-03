@@ -45,7 +45,7 @@ function clean_snapshot!(model::TierraModel)
     model.logger = DoNothingLogger()
 end
 
-function get_abstracted_organism(model, model_organism, parent_id)
+function get_abstracted_organism(model::TierraModel, model_organism::TierrianOrganism, parent_id)
     return Organism{TierrianPosition, TierrianEnvironment}(
                     get_id(model, model_organism),
                     get_genotype_id(model, model_organism),

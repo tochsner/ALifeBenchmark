@@ -1,6 +1,6 @@
 import Random
 
-function collect_distribution(model_creator, step_function, print_function, num_steps, num_trials)
+function collect_distribution(model_creator, step_function, print_function, num_steps, num_trials, slice_size)
     for t in 1:num_trials
         trial_id = time_ns()
 
@@ -9,7 +9,7 @@ function collect_distribution(model_creator, step_function, print_function, num_
         logger = RunLogger(trial_id)
         model = model_creator(logger)
 
-        for s in 1:convert(UInt64, floor(num_steps / SLICE_SIZE))
+        for s in 1:convert(UInt64, floor(num_steps / slice_size))
             step_function(model)
             print_function(t, s, model)
         end

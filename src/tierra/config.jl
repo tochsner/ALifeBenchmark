@@ -1,4 +1,4 @@
-const MUTATE = true
+const MUTATE = false
 const COSMIC_RAYS_PROBABILITY = 1e-9
 const FLAW_PROBABILITY = 1e-4
 

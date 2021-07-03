@@ -25,14 +25,7 @@ end
 function develop_nodes!(network::Network, rules)
     if length(network.inputs) == 0 return end
 
-    old_network = deepcopy(network)
-
-    time = @elapsed (some_reachable_node = develop_nodes!(network.inputs[1], rules))
-    if time > 1
-        println("sloooow")        
-        println(old_network)
-        println([string(r) * "\n" for r in rules])        
-    end
+    some_reachable_node = develop_nodes!(network.inputs[1], rules)
     update_inputs_outputs!(network, some_reachable_node)
 end
 
