@@ -5,38 +5,47 @@ struct BothSides <: Side end
 struct ToTheLeft <: Side end
 struct ToTheRight <: Side end
 
-function update_inputs!(model::GebModel, organism::GebOrganism)
+function determine_input_activations(model::GebModel, organism::GebOrganism)
     left_neighbors = _get_neighbors(ToTheLeft(), model, organism)
     right_neighbors = _get_neighbors(ToTheRight(), model, organism)
 
-    activations = []
+    activations = Float64[]
+
+    distances = Dict()
 
     for input in organism.network.inputs
         string = input.string
 
         if length(string) == 0
-            push!(activations, 0)
+            push!(activations, 0.0)
             continue
         end
 
         relevant_neighbors = (string[1] == '0') ? left_neighbors : right_neighbors
 
-        sum = 0
+        sum = 0.0
         for neighbor in relevant_neighbors
+            neighbor_sum = 0.0
+
             for output in neighbor.network.external_outputs
                 if _is_match(string[2:end], output.string) && length(output.excitatory_activation) == 1
-                    sum += output.excitatory_activation[1]
+                    neighbor_sum += output.excitatory_activation[1]
                 end
             end
-            if sum != 0
-                sum /= norm(organism.coordinates .- neighbor.coordinates)
+
+            if 0.0 < neighbor_sum
+                if haskey(distances, neighbor) == false
+                    distances[neighbor] = norm(organism.coordinates .- neighbor.coordinates)
+                end
+
+                sum += neighbor_sum / distances[neighbor]
             end
         end
 
         push!(activations, sum)
-    end
-
-    activate_inputs!(organism.network, activations)
+    end   
+    
+    return activations
 end
 
 function _get_neighbors(side::Side, model::GebModel, organism::GebOrganism)

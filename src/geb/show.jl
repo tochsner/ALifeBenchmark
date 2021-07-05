@@ -22,7 +22,7 @@ function Base.show(io::IO, organism::GebOrganism)
 end
 
 function Base.show(io::IO, network::Network)
-    apply_to_all(network.inputs[1]) do node 
+    apply_to_all(network) do node 
         Base.show(io, node)
     end
 end

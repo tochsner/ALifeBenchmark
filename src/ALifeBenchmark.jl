@@ -120,6 +120,7 @@ include("geb/utils.jl")
 include("geb/network/rule.jl")
 include("geb/network/node.jl")
 include("geb/network/network.jl")
+include("geb/network/BFS.jl")
 
 include("geb/network/rule_decoding.jl")
 include("geb/network/development.jl")

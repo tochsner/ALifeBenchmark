@@ -53,6 +53,7 @@ function kill!(model::GebModel, organism::GebOrganism)
     x, y = _get_grid_coordinates(organism.coordinates)
     model.grid[x, y] = nothing
 
+    @assert organism in model.organisms
     delete!(model.organisms, organism)
 
     log_death(model.logger, model, organism)

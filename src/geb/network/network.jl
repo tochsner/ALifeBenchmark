@@ -20,23 +20,21 @@ function Network(starting_node::Node)
     return network
 end
 
-function get_number_neurons(organism)
-    if length(organism.network.inputs) == 0 return 0 end
-
+function get_number_neurons(network)
     num_neurons = 0
-    apply_to_all(_ -> num_neurons += 1, organism.network.inputs[1])
+    apply_to_all(_ -> num_neurons += 1, network)
     return num_neurons
 end
 
-function update_inputs_outputs!(network, starting_node)
+function update_inputs_outputs!(network, starting_nodes)
     _remove_external_nodes(network)
-
+    
     clear!(network.inputs)
     clear!(network.outputs)
 
-    if starting_node === nothing return end
+    if length(starting_nodes) == 0 return end
 
-    apply_to_all(starting_node) do x
+    apply_to_all(starting_nodes) do x
         if x.type == InputNode()
             push!(network.inputs, x)
         elseif x.type == OutputNode()

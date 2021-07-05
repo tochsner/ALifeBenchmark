@@ -2,7 +2,7 @@ using Profile
 
 function get_axiom_network()
     network = Network()
-    update_inputs_outputs!(network, get_axiom_node())
+    update_inputs_outputs!(network, [get_axiom_node()])
     return network
 end
 function get_axiom_node()
@@ -23,33 +23,24 @@ function get_axiom_node()
 end
 
 function develop_nodes!(network::Network, rules)
-    if length(network.inputs) == 0 return end
+    if length(rules) == 0 return end
 
-    some_reachable_node = develop_nodes!(network.inputs[1], rules)
-    update_inputs_outputs!(network, some_reachable_node)
-end
+    num_neurons = get_number_neurons(network)
+    if MAX_NEURONS < num_neurons return end
 
-function develop_nodes!(starting_node::Node, rules)
-    apply_to_all(fill_temp!, starting_node)
-
-    some_reachable_nodes = []
-
-    apply_to_all(starting_node) do node
-        reachable_node = _develop_node!(node, rules)
-
-        if reachable_node !== nothing
-            push!(some_reachable_nodes, reachable_node)
-        end
+    _remove_external_nodes(network)
+    apply_to_all(fill_temp!, network)
+    
+    reachable_nodes = Node[]
+    
+    apply_to_all(network) do node
+        current_reachable_nodes = _develop_node!(node, rules)
+        append!(reachable_nodes, current_reachable_nodes)
     end
 
-    if 0 < length(some_reachable_nodes)
-        starting_node = some_reachable_nodes[1]
-    end
-
-    apply_to_all(apply_temp!, starting_node, to_temp = true)
-    apply_to_all(_remove_deleted, starting_node)
-
-    return 0 < length(some_reachable_nodes) ? some_reachable_nodes[1] : nothing
+    apply_to_all(apply_temp!, reachable_nodes, to_temp = true)
+    apply_to_all(_remove_deleted, reachable_nodes)
+    update_inputs_outputs!(network, reachable_nodes)
 end
 
 function _develop_node!(node, rules)
@@ -59,7 +50,7 @@ function _develop_node!(node, rules)
         rule_to_apply = rand(best_matching_rules)
         return _apply_rule!(rule_to_apply, node)
     else
-        return node
+        return [node]
     end
 end
 
@@ -78,7 +69,7 @@ function _apply_rule!(rule, node) # Assumes that temp are filled before calling
     # if we don't create a successor we're finished
 
     if rule.successor_2 == ""
-        return keep_node ? node : nothing
+        return keep_node ? [node] : []
     end
 
     # 2. create successor
@@ -141,7 +132,7 @@ function _apply_rule!(rule, node) # Assumes that temp are filled before calling
         push!(out_node.temp_in_excitatory, successor)
     end
 
-    return keep_node ? node : successor
+    return keep_node ? [node, successor] : [successor]
 end
 
 function _remove_deleted(node)

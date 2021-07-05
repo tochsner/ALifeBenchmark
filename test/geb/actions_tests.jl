@@ -173,7 +173,7 @@ end
     push!(node7.in_excitatory, node6)
 
     network = ALifeBenchmark.Network()
-    ALifeBenchmark.update_inputs_outputs!(network, node1)
+    ALifeBenchmark.update_inputs_outputs!(network, [node1])
     ALifeBenchmark.activate_inputs!(network, [0, 0], [0, 0])
 
     # build Geb model
