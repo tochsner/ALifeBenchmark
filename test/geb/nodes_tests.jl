@@ -78,8 +78,9 @@ end
     @test node2.string == "000"
     @test node3.string == "01"
 
+    network = ALifeBenchmark.Network(node1)
 
-    ALifeBenchmark.develop_nodes!(node1, rules)
+    ALifeBenchmark.develop_nodes!(network, rules)
 
     node4 = node2.out_excitatory[2]
 
@@ -88,8 +89,8 @@ end
     @test node3.string == "011"
     @test node4.string == "1101"
 
-    @test length(node1.in_inhibitory) == 0
-    @test length(node1.in_excitatory) == 0
+    @test length(node1.in_inhibitory) == 1
+    @test length(node1.in_excitatory) == 1
     @test length(node1.out_inhibitory) == 0
     @test length(node1.out_excitatory) == 1
 
@@ -100,13 +101,13 @@ end
 
     @test length(node3.in_inhibitory) == 0
     @test length(node3.in_excitatory) == 2
-    @test length(node3.out_inhibitory) == 0
-    @test length(node3.out_excitatory) == 0
+    @test length(node3.out_inhibitory) == 1
+    @test length(node3.out_excitatory) == 1
 
     @test length(node4.in_inhibitory) == 0
     @test length(node4.in_excitatory) == 1
-    @test length(node4.out_inhibitory) == 0
-    @test length(node4.out_excitatory) == 1
+    @test length(node4.out_inhibitory) == 1
+    @test length(node4.out_excitatory) == 2
 
     @test node1.out_excitatory[1] == node2
     @test node2.in_excitatory[1] == node1
@@ -120,14 +121,15 @@ end
     @test node4.out_excitatory[1] == node3
     @test node3.in_excitatory[2] == node4
 
-
-    ALifeBenchmark.develop_nodes!(node1, rules)
+    
+    ALifeBenchmark.develop_nodes!(network, rules)
+    
     
     node3 = node4.out_excitatory[1]
     node5 = node4.out_inhibitory[1]
-
-    @test length(node1.in_inhibitory) == 0
-    @test length(node1.in_excitatory) == 0
+    
+    @test length(node1.in_inhibitory) == 1
+    @test length(node1.in_excitatory) == 1
     @test length(node1.out_inhibitory) == 0
     @test length(node1.out_excitatory) == 1
     
@@ -138,18 +140,18 @@ end
     
     @test length(node3.in_inhibitory) == 0
     @test length(node3.in_excitatory) == 2
-    @test length(node3.out_inhibitory) == 0
-    @test length(node3.out_excitatory) == 0
+    @test length(node3.out_inhibitory) == 1
+    @test length(node3.out_excitatory) == 1
     
     @test length(node4.in_inhibitory) == 0
     @test length(node4.in_excitatory) == 2
-    @test length(node4.out_inhibitory) == 1
-    @test length(node4.out_excitatory) == 1
+    @test length(node4.out_inhibitory) == 2
+    @test length(node4.out_excitatory) == 2
     
     @test length(node5.in_inhibitory) == 1
     @test length(node5.in_excitatory) == 1
-    @test length(node5.out_inhibitory) == 0
-    @test length(node5.out_excitatory) == 1
+    @test length(node5.out_inhibitory) == 1
+    @test length(node5.out_excitatory) == 2
     
     @test node1.out_excitatory[1] == node2
     @test node2.in_excitatory[1] == node1
@@ -192,8 +194,9 @@ end
     @test node2.string == "000"
     @test node3.string == "01"
 
+    network = ALifeBenchmark.Network(node1)
 
-    ALifeBenchmark.develop_nodes!(node1, rules)
+    ALifeBenchmark.develop_nodes!(network, rules)
 
     node4 = node2.in_excitatory[2]
     node5 = node1.out_excitatory[2]
@@ -206,8 +209,8 @@ end
     @test node5.string == "00"
     @test node6.string == "000"
 
-    @test length(node1.in_inhibitory) == 0
-    @test length(node1.in_excitatory) == 0
+    @test length(node1.in_inhibitory) == 1
+    @test length(node1.in_excitatory) == 1
     @test length(node1.out_inhibitory) == 0
     @test length(node1.out_excitatory) == 2
     
@@ -218,11 +221,11 @@ end
     
     @test length(node3.in_inhibitory) == 0
     @test length(node3.in_excitatory) == 3
-    @test length(node3.out_inhibitory) == 0
-    @test length(node3.out_excitatory) == 0
+    @test length(node3.out_inhibitory) == 1
+    @test length(node3.out_excitatory) == 1
     
-    @test length(node4.in_inhibitory) == 0
-    @test length(node4.in_excitatory) == 0
+    @test length(node4.in_inhibitory) == 1
+    @test length(node4.in_excitatory) == 1
     @test length(node4.out_inhibitory) == 0
     @test length(node4.out_excitatory) == 1
     
@@ -233,10 +236,8 @@ end
     
     @test length(node6.in_inhibitory) == 0
     @test length(node6.in_excitatory) == 1
-    @test length(node6.out_inhibitory) == 0
-    @test length(node6.out_excitatory) == 1
-
-    println([n.string for n in node1.out_excitatory])
+    @test length(node6.out_inhibitory) == 1
+    @test length(node6.out_excitatory) == 2
 
     @test node1.out_excitatory[1] == node2
     @test node2.in_excitatory[1] == node1

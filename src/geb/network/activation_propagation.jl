@@ -2,8 +2,7 @@ _can_fire(node) = all([a >= 0 for a in node.inhibitory_activation]) &&
                     all([a >= 0 for a in node.excitatory_activation])
 
 function reset_activations!(network::Network)
-    if length(network.inputs) == 0 return end
-    apply_to_all(reset_activations!, network.inputs[1])
+    apply_to_all(reset_activations!, network)
 end
 function reset_activations!(node::Node)
     node.inhibitory_activation = [-1 for _ in node.in_inhibitory]

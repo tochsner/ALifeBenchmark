@@ -64,7 +64,7 @@ end
     push!(node7.in_excitatory, node6)
 
     network = ALifeBenchmark.Network()
-    ALifeBenchmark.update_inputs_outputs!(network, node1)
+    ALifeBenchmark.update_inputs_outputs!(network, [node1])
 
     @test length(network.inputs) == 2
     @test length(network.outputs) == 2

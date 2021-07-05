@@ -12,8 +12,10 @@ include("geb/nodes_tests.jl")
 include("geb/rules_tests.jl")
 include("geb/utils_tests.jl")
 
+"""
 include("tierra/scheduler_tests.jl")
 include("tierra/instruction_tests.jl")
 include("tierra/ancestor_tests.jl")
 include("tierra/memory_utils_tests.jl")
 include("tierra/memory_tests.jl")
+"""
