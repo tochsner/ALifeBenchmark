@@ -25,36 +25,25 @@ function execute!(model::GebModel)
     end
     
     @threads for (i, organism) in unique(enumerate(organisms_in_batch))
-        n = deepcopy(organism.network)
         time = @elapsed develop_nodes!(organism.network, organism.rules)
-        if time > 0.1
-            println(" ", get_number_neurons(n))
-            println(get_number_neurons(organism.network))
-            println(length(organism.rules))
-        end
     end
     
     @threads for (i, organism) in unique(enumerate(organisms_in_batch))
-        time = @elapsed begin
-            activations = determine_input_activations(model, organism)
-            num_outputs = length(activations)
-            
-            activations_in_batch[i, 1:num_outputs] = activations
-            activation_size_in_batch[i] = num_outputs
-        end
+        activations = determine_input_activations(model, organism)
+        num_outputs = length(activations)
+        
+        activations_in_batch[i, 1:num_outputs] = activations
+        activation_size_in_batch[i] = num_outputs
+    end
 
-        if time > 0.1
-            println(get_number_neurons(organism.network))
-            println(length(organism.rules))
-        end
+    @threads for (i, organism) in unique(enumerate(organisms_in_batch))
+        activate_inputs!(organism.network, activations_in_batch[i, 1:activation_size_in_batch[i]])
     end
 
     for (i, organism) in enumerate(organisms_in_batch)
         if !(organism in model.organisms) continue end
 
-        activate_inputs!(organism.network, activations_in_batch[i, 1:activation_size_in_batch[i]])
         perform!(model, organism)
-
         organism.age += 1
     end
 
