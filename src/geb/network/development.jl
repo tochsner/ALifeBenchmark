@@ -23,19 +23,36 @@ function get_axiom_node()
 end
 
 function develop_nodes!(network::Network, rules)
+    if network.fully_developed return end
     if length(rules) == 0 return end
-
-    num_neurons = get_number_neurons(network)
-    if MAX_NEURONS < num_neurons return end
-
+ 
     _remove_external_nodes(network)
     apply_to_all(fill_temp!, network)
     
+    any_change = false
+    num_reachable_nodes = 0
     reachable_nodes = Node[]
-    
+
     apply_to_all(network) do node
+        if MAX_NEURONS < num_reachable_nodes return end
+
+        old_name = deepcopy(node.string)
         current_reachable_nodes = _develop_node!(node, rules)
+
+        if !any_change && (node.string != old_name || current_reachable_nodes != [node])
+            any_change = true
+        end
+
         append!(reachable_nodes, current_reachable_nodes)
+        num_reachable_nodes += length(current_reachable_nodes)
+    end
+
+    if MAX_NEURONS < num_reachable_nodes 
+        network.fully_developed = true
+    end
+
+    if !any_change
+        network.fully_developed = true
     end
 
     apply_to_all(apply_temp!, reachable_nodes, to_temp = true)

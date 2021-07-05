@@ -26,8 +26,8 @@ end
 
 function _get_grid_coordinates(continuous_coordinates)
     (
-        max(1, Int(ceil(continuous_coordinates[1]))),
-        max(1, Int(ceil(continuous_coordinates[2])))
+        @fastmath max(1, Int(ceil(continuous_coordinates[1]))),
+        @fastmath max(1, Int(ceil(continuous_coordinates[2])))
     )    
 end
 

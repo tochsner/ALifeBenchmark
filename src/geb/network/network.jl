@@ -1,9 +1,11 @@
-struct Network
+mutable struct Network
     inputs::Vector{Node}
     outputs::Vector{Node}
     external_outputs::Vector{Node} 
 
-    Network() = new([], [], [])
+    fully_developed::Bool
+
+    Network() = new([], [], [], false)
 end
 
 function Network(starting_node::Node)

@@ -1,13 +1,19 @@
 using LinearAlgebra
+import Base.FastMath.@fastmath
 
 abstract type Side end
 struct BothSides <: Side end
 struct ToTheLeft <: Side end
 struct ToTheRight <: Side end
 
-function determine_input_activations(model::GebModel, organism::GebOrganism)
-    left_neighbors = _get_neighbors(ToTheLeft(), model, organism)
-    right_neighbors = _get_neighbors(ToTheRight(), model, organism)
+function determine_input_activations(model::GebModel, organism::GebOrganism)    
+    all_neighbors = _get_neighbors(BothSides(), model, organism)
+
+    left_neighbors = nothing
+    right_neighbors = nothing
+
+    loaded_left_neighbors = false
+    loaded_right_neighbors = false
 
     activations = Float64[]
 
@@ -21,7 +27,19 @@ function determine_input_activations(model::GebModel, organism::GebOrganism)
             continue
         end
 
-        relevant_neighbors = (string[1] == '0') ? left_neighbors : right_neighbors
+        if string[1] == '0'
+            if loaded_left_neighbors == false
+                left_neighbors = _get_neighbors(ToTheLeft(), model, organism, all_neighbors)
+                loaded_left_neighbors == true
+            end
+            relevant_neighbors = left_neighbors
+        else
+            if loaded_right_neighbors == false
+                right_neighbors = _get_neighbors(ToTheRight(), model, organism, all_neighbors)
+                loaded_right_neighbors == true
+            end
+            relevant_neighbors = right_neighbors
+        end
 
         sum = 0.0
         for neighbor in relevant_neighbors
@@ -35,10 +53,10 @@ function determine_input_activations(model::GebModel, organism::GebOrganism)
 
             if 0.0 < neighbor_sum
                 if haskey(distances, neighbor) == false
-                    distances[neighbor] = norm(organism.coordinates .- neighbor.coordinates)
+                    distances[neighbor] = @fastmath norm(organism.coordinates .- neighbor.coordinates)
                 end
 
-                sum += neighbor_sum / distances[neighbor]
+                sum += (neighbor_sum / distances[neighbor])
             end
         end
 
@@ -48,10 +66,12 @@ function determine_input_activations(model::GebModel, organism::GebOrganism)
     return activations
 end
 
-function _get_neighbors(side::Side, model::GebModel, organism::GebOrganism)
-    all_neighbors = _get_neighbors(BothSides(), model, organism)
+function _get_neighbors(side::Side, model::GebModel, organism::GebOrganism, all_neighbors)
+    [neighbor for neighbor in all_neighbors if _is_on_side(side, model, neighbor, organism)]
+end
 
-    return [neighbor for neighbor in all_neighbors if _is_on_side(side, model, neighbor, organism)]
+function _get_neighbors(side::Side, model::GebModel, organism::GebOrganism)
+    _get_neighbors(side, model, organism, _get_neighbors(BothSides(), model, organism))
 end
 
 function _get_neighbors(::BothSides, model::GebModel, organism::GebOrganism)
@@ -76,23 +96,23 @@ function _is_on_side(side::Side, model::GebModel, target::GebOrganism, source::G
     _is_on_side(side, model, target.coordinates, source.coordinates, source.direction)
 end
 function _is_on_side(side::Side, model::GebModel, target_coordinates, source_coordinates, source_direction)
-    Δx = target_coordinates[1] - source_coordinates[1]
-    Δy = -(target_coordinates[2] - source_coordinates[2]) # negative as direction of y-axis is different in array!
+    Δx = @fastmath (target_coordinates[1] - source_coordinates[1])
+    Δy = @fastmath -(target_coordinates[2] - source_coordinates[2]) # negative as direction of y-axis is different in array!
 
     # test if wrap-over sides is nearer
     if abs(Δx) >= model.size / 2
-        Δx = Δx - sign(Δx)*model.size
+        Δx = @fastmath (Δx - sign(Δx)*model.size)
     end
     if abs(Δy) >= model.size / 2
-        Δy = Δy - sign(Δy)*model.size
+        Δy = @fastmath (Δy - sign(Δy)*model.size)
     end
 
     if Δx == 0
         target_direction = (0 <= Δy) ? 90 : 270
     elseif Δx < 0
-        target_direction = 180 + atand(Δy / Δx)
+        target_direction = @fastmath (180 + atand(Δy / Δx))
     elseif 0 < Δx
-        target_direction = atand(Δy / Δx)
+        target_direction = @fastmath (atand(Δy / Δx))
     end
 
     return _is_on_side(side, target_direction, source_direction)

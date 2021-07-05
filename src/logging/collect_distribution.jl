@@ -9,10 +9,14 @@ function collect_distribution(model_creator, step_function, print_function, num_
         logger = DoNothingLogger() # RunLogger(trial_id)
         model = model_creator(logger)
 
+        time = 0
+
         for s in 1:convert(UInt64, floor(num_steps / slice_size))
-            step_function(model)
+            time += step_function(model)
             print_function(t, s, model)
         end
+
+        println(time)
 
         save_log(logger)
     end

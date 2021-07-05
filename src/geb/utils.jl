@@ -22,3 +22,19 @@ function index_of(array::Array{T, N}, element::T) where {T, N}
 end
 
 mod_1(x, d) = mod(x - 1, d) + 1
+
+"""
+struct IndexList{T}
+    items::Dict{T, UInt64}
+end
+
+Base.length(list::IndexList) = length(list.items)
+
+function Base.push!(list::IndexList{T}, element::T) where {T}
+    list.items[element] = length(list) + 1
+end
+
+function index_of(list::IndexList{T}, element::T) where {T}
+   list.items[element]
+end
+"""
