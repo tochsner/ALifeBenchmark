@@ -12,7 +12,7 @@ function collect_distribution(model_creator, step_function, print_function, num_
         time = 0
 
         for s in 1:convert(UInt64, floor(num_steps / slice_size))
-            time += step_function(model)
+            step_function(model)
             print_function(t, s, model)
         end
 
