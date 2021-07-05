@@ -1,5 +1,6 @@
-_can_fire(node) = all([a >= 0 for a in node.inhibitory_activation]) && 
-                    all([a >= 0 for a in node.excitatory_activation])
+_can_fire(node) = !node.has_fired &&
+                    all(x -> x >= 0, node.inhibitory_activation) && 
+                    all(x -> x >= 0, node.excitatory_activation)
 
 function reset_activations!(network::Network)
     apply_to_all(reset_activations!, network)
@@ -7,6 +8,7 @@ end
 function reset_activations!(node::Node)
     node.inhibitory_activation = [-1 for _ in node.in_inhibitory]
     node.excitatory_activation = [-1 for _ in node.in_excitatory]
+    node.has_fired = false
 end
 
 function activate_inputs!(network, excitatory_activations)
@@ -35,25 +37,22 @@ function activate_inputs!(network, excitatory_activations, inhibitory_activation
     end
 end
 
-function inhibit!(target, source, activation)
-    try
-        target.inhibitory_activation[index_of(target.in_inhibitory, source)] = activation
-    catch
-        println(source in target.in_inhibitory)
-        println(target in source.out_inhibitory)
-        println(source.string)
-        println([x.string for x in target.in_inhibitory])
-        println(source.type)
-        println(target.type)
-    end
+function inhibit!(target, source::Node, activation)
+    inhibit!(target, index_of(target.in_inhibitory, source), activation)
+end
+function inhibit!(target, source_index::Int, activation)
+    target.inhibitory_activation[source_index] = activation
 
     if _can_fire(target)
         fire!(target)
     end
 end
 
-function excite!(target, source, activation)
-    target.excitatory_activation[index_of(target.in_excitatory, source)] = activation
+function excite!(target, source::Node, activation)
+    excite!(target, index_of(target.in_excitatory, source), activation)
+end
+function excite!(target, source_index::Int, activation)
+    target.excitatory_activation[source_index] = activation
     
     if _can_fire(target)
         fire!(target)
@@ -61,7 +60,7 @@ function excite!(target, source, activation)
 end
 
 function fire!(node)
-    if node.type == ExternalNode() return end
+    if node.type == ExternalNode() return end    
 
     excitatory_output = 0
     inhibitory_output = 0
@@ -69,7 +68,7 @@ function fire!(node)
     inhibitory_activation = sum(node.inhibitory_activation)
     excitatory_activation = sum(node.excitatory_activation)
 
-    reset_activations!(node)
+    node.has_fired = true
 
     if inhibitory_activation <= 0
         excitatory_output = excitatory_activation

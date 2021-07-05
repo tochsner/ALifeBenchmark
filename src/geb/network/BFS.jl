@@ -30,13 +30,21 @@ function apply_to_neighbors(func, node; to_temp = false)
 end
 
 function apply_to_all(func, network::Network; to_temp = false)
-    apply_to_all(func, [network.inputs; network.outputs], to_temp = to_temp)
+    already_visited_nodes = Set{Node}()
+
+    for node in network.inputs
+        _apply_to_all(func, node, already_visited_nodes, to_temp = to_temp)
+    end
+    for node in network.outputs
+        _apply_to_all(func, node, already_visited_nodes, to_temp = to_temp)
+    end
 end
 function apply_to_all(func, node::Node; to_temp = false)
     apply_to_all(func, [node], to_temp = to_temp)
 end
 function apply_to_all(func, nodes::Vector{Node}; to_temp = false)
-    already_visited_nodes = []
+    already_visited_nodes = Set{Node}()
+    
     for node in nodes
         _apply_to_all(func, node, already_visited_nodes, to_temp = to_temp)
     end
