@@ -8,7 +8,7 @@ mutable struct RunLogger <: Logger
     RunLogger(trial_id) = new(string(trial_id), Dict(), Dict())
 end
 
-function log_step(logger::RunLogger, model)
+function log_step(logger::RunLogger, model, save_genotype_as_file = true)
     if LOG_PROBABILITY < rand() return end
 
     snapshot_id = string(time_ns())
@@ -19,7 +19,9 @@ function log_step(logger::RunLogger, model)
     for organism in current_organisms
         id = get_id(model, organism)
         logger.logged_organisms_alive[id].snapshot_id = snapshot_id
-        save_genotype(model, organism)
+        if save_genotype_as_file
+            save_genotype(model, organism)
+        end
     end
 
     save_log(logger)

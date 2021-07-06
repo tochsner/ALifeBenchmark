@@ -6,7 +6,7 @@ function collect_distribution(model_creator, step_function, print_function, num_
 
         Random.seed!(0) # trial_id)
 
-        logger = DoNothingLogger() # RunLogger(trial_id)
+        logger = RunLogger(trial_id)
         model = model_creator(logger)
 
         time = 0

@@ -18,7 +18,7 @@ function get_id(::GebModel, gebbian_organisms::Vector{GebOrganism})
     [o.key for o in gebbian_organisms]
 end
 function get_genotype_id(::GebModel, gebbian_organism::GebOrganism)
-    bytes2hex(sha256(gebbian_organism.genotype))
+    gebbian_organism.genotype
 end
 function get_genotype(gebbian_model::GebModel, gebbian_organism::GebOrganism)
     gebbian_organism.genotype
