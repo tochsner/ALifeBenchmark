@@ -50,6 +50,8 @@ function add_organism!(model::GebModel, organism::GebOrganism)
 end
 
 function kill!(model::GebModel, organism::GebOrganism)
+    if length(model.organisms) <= MIN_ORGANISMS return end
+
     x, y = _get_grid_coordinates(organism.coordinates)
     model.grid[x, y] = nothing
 
