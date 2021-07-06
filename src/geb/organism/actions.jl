@@ -24,27 +24,27 @@ function perform!(action::GebAction, model::GebModel, organism::GebOrganism)
     prefix = _get_prefix(action)
 
     excitatory_sum = 0
-    has_match = false
 
     for external in organism.network.external_outputs
         if _is_match(prefix, external.string)
-            has_match = true
             excitatory_sum += sum(external.excitatory_activation)
         end
     end
+    
+    excitatory_sum += 2*NOISE_LEVEL*rand() - NOISE_LEVEL   
 
-    if !has_match
-        excitatory_sum = 2*NOISE_LEVEL*rand() - NOISE_LEVEL
-    else
-        excitatory_sum = max(-1, min(1, excitatory_sum))
-    end
+    excitatory_sum = max(excitatory_sum, EXCITATORY_MIN)
+    excitatory_sum = min(excitatory_sum, EXCITATORY_MAX)
+    
+    excitatory_sum -= EXCITATORY_MIN
+    excitatory_sum /= (EXCITATORY_MAX - EXCITATORY_MIN)
 
     perform!(action, model, organism, excitatory_sum)
 end
 
 function perform!(::CrossOver, model::GebModel, parent_1::GebOrganism, activation)
     if activation < CROSS_OVER_THRESHOLD return end
-
+    
     parent_2 = _get_organism_in_front(model, parent_1)
 
     if parent_2 === nothing return end
@@ -143,7 +143,7 @@ function perform!(::MoveForward, model::GebModel, organism::GebOrganism, distanc
     # move to new cell
     organism.coordinates = x_end, y_end
     model.grid[x_start_grid, y_start_grid] = nothing
-    model.grid[x_end_grid, y_end_grid] = organism
+    model.grid[x_end_grid, y_end_grid] = organism    
 end
 
 function perform!(::NoAction, ::GebModel, ::GebOrganism, _) end
