@@ -13,7 +13,7 @@ function print_function(trial, step, model)
     end
 end
 
-const NUM_ITERATIONS = 1e4
+const NUM_ITERATIONS = 1e6
 const NUM_TRIALS = 1
 
 collect_distribution(create_model, execute!, print_function, NUM_ITERATIONS, NUM_TRIALS, 1)
