@@ -192,6 +192,6 @@ end
 
     ALifeBenchmark.perform!(model, organism_11)
 
-    @test organism_11.coordinates == (0.5 + 0.2805599027529448, 0.5)
-    @test organism_11.direction == 346
+    @test organism_11.coordinates == (0.8611964416081808, 0.5)
+    @test organism_11.direction == 7
 end
