@@ -43,19 +43,16 @@ function add_logged_organisms(data::CollectedData, trial_id)
     else
         logged_organisms = []
 
-        i = 0
-
         for file in readdir(LOGGER_FOLDER)
-            if occursin("compact", file) || isfile(LOGGER_FOLDER * file) == false continue end
+            if isfile(LOGGER_FOLDER * file) == false continue end
+            if occursin("compact", file) continue end
+            if isfile(LOGGER_FOLDER * file * "c") continue end
             
             current_trial_id = split(trial_id, "_")[1]
             if current_trial_id != trial_id continue end
     
             logger = deserialize(LOGGER_FOLDER * file)
             append!(logged_organisms, values(logger.logged_organisms_alive))
-
-            println(i)
-            i += 1
         end
 
         println(LOGGER_FOLDER * trial_id * "compact")

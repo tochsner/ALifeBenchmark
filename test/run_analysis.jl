@@ -5,24 +5,6 @@ using Plots
 
 import Base.Threads.@threads
 
-using Serialization
-
-LOGGER_FOLDER = ENV["SCRATCH"] * "/tierra_logs/logs/"
-
-for (j, file) in enumerate(readdir(LOGGER_FOLDER))
-    if occursin("compact", file) || isfile(LOGGER_FOLDER * file) == false continue end
-    
-    logger = deserialize(LOGGER_FOLDER * file)
-    logger.logged_organisms_dead = Dict()
-
-    serialize(LOGGER_FOLDER * file * "c", logger)
-
-    println(j)
-    j += 1
-end
-
-exit()
-
 println("Loading collected data...")
 data = load_collected_data()
 println("Colleted data loaded.\n")
@@ -40,7 +22,7 @@ function level_of_adaption()
     adaptions = SharedArray{Float64}(num_snapshots)
     times = SharedArray{UInt32}(num_snapshots)
 
-    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
+    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids[1:3]))
         adaption = get_adaption_of_snapshot(data, last_snaphot_id, snapshot_id, 0.1, 5, 200)
         time = get_time(get_snapshot(data, snapshot_id))
 
