@@ -5,6 +5,24 @@ using Plots
 
 import Base.Threads.@threads
 
+using Serialization
+
+LOGGER_FOLDER = "tierra_logs/logs/"
+
+for (j, file) in enumerate(readdir(LOGGER_FOLDER))
+    if occursin("compact", file) || isfile(LOGGER_FOLDER * file) == false continue end
+    
+    logger = deserialize(LOGGER_FOLDER * file)
+    logger.logged_organisms_dead = Dict()
+
+    serialize(LOGGER_FOLDER * file * "c", logger)
+
+    println(j)
+    j += 1
+end
+
+exit()
+
 println("Loading collected data...")
 data = load_collected_data()
 println("Colleted data loaded.\n")
