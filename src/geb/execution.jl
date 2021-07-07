@@ -48,5 +48,5 @@ function execute!(model::GebModel)
     end
 
     model.time += 1
-    log_step(model.logger, model)
+    log_step(model.logger, model, false)
 end

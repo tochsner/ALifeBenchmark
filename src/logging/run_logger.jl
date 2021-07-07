@@ -53,10 +53,10 @@ function log_death(logger::RunLogger, model, organism)
     organism_id = get_id(model, organism)
 
     if haskey(logger.logged_organisms_alive, organism_id)
-        logger.logged_organisms_dead[organism_id] = logger.logged_organisms_alive[organism_id]
+        # logger.logged_organisms_dead[organism_id] = logger.logged_organisms_alive[organism_id]
         delete!(logger.logged_organisms_alive, organism_id)
         
-        logger.logged_organisms_dead[organism_id].time_death = time
+        # logger.logged_organisms_dead[organism_id].time_death = time
     end
 end
 
