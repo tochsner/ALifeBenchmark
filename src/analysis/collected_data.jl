@@ -11,9 +11,9 @@ struct CollectedData
     genotypes::Dict{String, Any}
     trial_ids::Vector{String}
 
-    lock::ReentrantLock
-
     phenotype_similarities::Dict{Tuple{String, String}, PhenotypeSimilarity}
+    
+    lock::ReentrantLock
 
     CollectedData() = new([], Dict(), Dict(), [], Dict(), ReentrantLock())
 end
@@ -39,7 +39,7 @@ function load_collected_data(; load_logged_organisms = true)
 end
 
 function get_trials()
-    unique([split(t, "_")[1] for t in readdir(LOGGER_FOLDER) if occursin("compact", t) == false && isfile(LOGGER_FOLDER * t)])
+    unique([String(split(t, "_")[1]) for t in readdir(LOGGER_FOLDER) if occursin("compact", t) == false && isfile(LOGGER_FOLDER * t)])
 end
 
 function add_logged_organisms(data::CollectedData, trial_id)
