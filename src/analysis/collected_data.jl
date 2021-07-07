@@ -16,12 +16,16 @@ struct CollectedData
     CollectedData() = new([], Dict(), Dict(), [], Dict())
 end
 
-function load_collected_data()
+function load_collected_data(; load_logged_organisms = true)
     data = CollectedData()
 
     for trial_id in get_trials()
         push!(data.trial_ids, trial_id)
-        add_logged_organisms(data, trial_id)
+
+        if load_logged_organisms
+            add_logged_organisms(data, trial_id)
+        end
+
         println("Loaded ", trial_id, " (Total ", length(data.logged_organisms), " organisms logged)")
     end
 

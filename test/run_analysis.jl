@@ -6,10 +6,10 @@ using Plots
 import Base.Threads.@threads
 
 println("Loading collected data...")
-data = load_collected_data()
+data = load_collected_data(load_logged_organisms = false)
 println("Colleted data loaded.\n")
 
-TRIAL_ID = "21507144614952565"
+TRIAL_ID = "12433992799852588"
 
 function level_of_adaption()
     println("Level of Adaption:")
@@ -41,7 +41,40 @@ function level_of_adaption()
             yguide = "Adaption",
             seriestype = :scatter,
             dpi = 600)
-    savefig("LevelOfAdaption", )
+    savefig("LevelOfAdaption")
+end
+
+function reachable_fitness()
+    println("Reachable Fitness:")
+
+    snapshot_ids = get_snapshot_ids(data, TRIAL_ID)
+    num_snapshots = length(snapshot_ids)
+
+    last_snaphot_id = snapshot_ids[end]
+
+    reachable_fitness = SharedArray{Float64}(num_snapshots)
+    times = SharedArray{UInt32}(num_snapshots)
+
+    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids[1:3]))
+        current_reachable_fitness = get_reachable_fitness(data, snapshot_id, 0.01, 5, 200)
+        current_time = get_time(get_snapshot(data, snapshot_id))
+
+        println(current_time, "\t", current_reachable_fitness)
+
+        reachable_fitness[i] = current_reachable_fitness
+        times[i] = current_time
+    end
+
+    serialize("ReachableFitness", (times, reachable_fitness))
+
+    plot(times, reachable_fitness, 
+            title = "Reachable Fitness",
+            label = "",
+            xguide = "Time",
+            yguide = "Reachable Fitness",
+            seriestype = :scatter,
+            dpi = 600)
+    savefig("ReachableFitness")
 end
 
 # genotype_id_1 = "4154df3571b1ddce463713e5e713a0d8d4e80c465bdae473b87502b8160e7aeb"
