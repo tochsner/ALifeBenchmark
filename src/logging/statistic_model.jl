@@ -1,5 +1,5 @@
-get_organism_ids(snapshot) = get_id.(get_organisms(snapshot))
-get_id(snapshot, organisms::Vector) = get_id.(snapshot, organisms)
+get_organism_ids(snapshot) = [get_id(snapshot, o) for o in get_organisms(snapshot)]
+get_id(snapshot, organisms::Vector) = [get_id(snapshot, o) for o in organisms]
 
 function get_fitness(snapshot, abstracted_organism_to_replace::Organism, new_genotype)    
     get_fitness(snapshot, abstracted_organism_to_replace.id, new_genotype)
@@ -14,8 +14,14 @@ function get_fitness(snapshot, organism)
     num_daughters = length(get_daughters(snapshot, organism))
     age = get_age(snapshot, organism)
     fitness = num_daughters / age
-    
+
     return age == 0 ? 0 : fitness
+end
+
+function simulate_snapshot!(termination_predicate, snapshot, logger = DoNothingLogger())
+    snapshot = deepcopy(snapshot)
+    set_logger!(snapshot, logger)
+    run_until!(termination_predicate, snapshot)
 end
 
 function simulate_organism!(snapshot, abstracted_organism_to_replace::Organism, new_genotype)

@@ -28,30 +28,31 @@ function get_reachable_fitness(data::CollectedData, snapshot_id::String, rel_tol
 
     reachable_fitness = estimate(rel_tolerance, min_samples, max_samples, print_progress=false) do
         reachable_fitness = 0
-
-        logger = ReachableFitnessLogger(snapshot)
-        run_until(snapshot, should_terminate, logger)
         
-        while length(logger.children) == 0
+        while true
             logger = ReachableFitnessLogger(snapshot)
-            run_until(snapshot, should_terminate, logger)
-        end
-        
-        num_beneficial = 0        
-
-        for child in logger.children
-            parent = logger.parents[child]
+            simulate_snapshot!(should_terminate, snapshot, logger)
             
-            fitness_child = logger.fitness[child]
-            fitness_parent = logger.fitness[parent]
+            if length(logger.children) == 0 continue end
 
-            
-            if fitness_parent < fitness_child
-                num_beneficial += 1
+            fitness_ratios = []        
+
+            for child in logger.children
+                parent = logger.parents[child]
+                
+                fitness_child = logger.fitness[child]
+                fitness_parent = logger.fitness[parent]
+                
+                if fitness_parent != 0
+                    push!(fitness_ratios, fitness_child / fitness_parent)
+                end
             end
-        end
 
-        reachable_fitness = num_beneficial / length(logger.children)
+            if length(fitness_ratios) == 0 continue end
+
+            reachable_fitness = mean(fitness_ratios)
+            break
+        end
 
         return reachable_fitness
     end
@@ -59,7 +60,8 @@ function get_reachable_fitness(data::CollectedData, snapshot_id::String, rel_tol
     return reachable_fitness
 end
 
-function should_terminate(logger::ReachableFitnessLogger, snapshot) 
+function should_terminate(snapshot)
+    logger = get_logger(snapshot) 
     length(logger.original_organisms_alive) + length(logger.direct_children_alive) == 0
 end
 

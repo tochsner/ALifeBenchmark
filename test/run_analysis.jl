@@ -2,8 +2,9 @@ using ALifeBenchmark
 using Random
 import SharedArrays.SharedArray
 using Plots
-
+using Serialization
 import Base.Threads.@threads
+using StringDistances: Levenshtein
 
 using Serialization
 
@@ -22,16 +23,31 @@ function level_of_adaption()
     last_snaphot_id = snapshot_ids[end]
 
     adaptions = SharedArray{Float64}(num_snapshots)
-    times = SharedArray{UInt32}(num_snapshots)
+    times = SharedArray{UInt64}(num_snapshots)
+
+    println(num_snapshots)
+
+    count = Threads.Atomic{Int}(0)
+    l = Threads.ReentrantLock()
 
     @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
-        adaption = get_adaption_of_snapshot(data, last_snaphot_id, snapshot_id, 0.1, 5, 200)
+        adaption = get_adaption_of_snapshot(data, last_snaphot_id, snapshot_id, 0.01, 20, 200)
         time = get_time(get_snapshot(data, snapshot_id))
 
         println(time, "\t", adaption)
 
-        adaptions[i] = adaption
-        times[i] = time
+        Threads.atomic_add!(count, 1)
+
+        if count[] % 20 == 0
+            lock(l) do
+                serialize("LevelofAdaption" * string(time_ns()), (times, adaptions))
+            end
+        end
+
+        lock(l) do
+            adaptions[i] = adaption
+            times[i] = time
+        end
     end
 
     serialize("LevelofAdaption", (times, adaptions))
@@ -42,7 +58,9 @@ function level_of_adaption()
             xguide = "Time",
             yguide = "Adaption",
             seriestype = :scatter,
-            dpi = 600)
+            markersize = 1.5,
+            markerstrokewidth = 0,
+            dpi = 1000)
     savefig("LevelOfAdaption")
 end
 
@@ -55,10 +73,10 @@ function reachable_fitness()
     last_snaphot_id = snapshot_ids[end]
 
     reachable_fitness = SharedArray{Float64}(num_snapshots)
-    times = SharedArray{UInt32}(num_snapshots)
+    times = SharedArray{UInt64}(num_snapshots)
 
-    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids[1:3]))
-        current_reachable_fitness = get_reachable_fitness(data, snapshot_id, 0.01, 5, 200)
+    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids[1:10]))
+        current_reachable_fitness = get_reachable_fitness(data, snapshot_id, 0.01, 50, 200)
         current_time = get_time(get_snapshot(data, snapshot_id))
 
         println(current_time, "\t", current_reachable_fitness)
@@ -75,8 +93,110 @@ function reachable_fitness()
             xguide = "Time",
             yguide = "Reachable Fitness",
             seriestype = :scatter,
-            dpi = 600)
+            markersize = 1.5,
+            markerstrokewidth = 0,
+            dpi = 1000)
     savefig("ReachableFitness")
+end
+
+function population_divergence()
+    trials = get_trials()
+    num_trials = length(trials)
+
+    all_divergences = []
+    all_times = []    
+    
+    for trial_id in trials
+        println("Population Divergence:")
+
+        snapshot_ids = get_snapshot_ids(data, trial_id)
+        num_snapshots = length(snapshot_ids)
+
+        last_snaphot_id = snapshot_ids[end]
+        last_snapshot = get_snapshot(data, last_snaphot_id)
+        last_distribution = get_genotype_distribution(last_snapshot)
+
+        divergences = SharedArray{Float64}(num_snapshots)
+        times = SharedArray{UInt64}(num_snapshots)
+
+        @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
+            current_snapshot = get_snapshot(data, snapshot_id)
+            current_time = get_time(current_snapshot)
+            
+            current_distribution = get_genotype_distribution(current_snapshot)
+            current_distance = _wasserstein(last_distribution, current_distribution, Levenshtein())
+
+            divergences[i] = current_distance
+            times[i] = current_time
+        end
+
+        push!(all_divergences, divergences)
+        push!(all_times, times)
+    end
+    
+    serialize("PopulationDivergence", (trials, all_times, all_divergences))
+    
+    plot(all_times, all_divergences, 
+            title = "Population Divergence",
+            label = "",
+            xguide = "Time",
+            yguide = "Population Divergence (Wasserstein)",
+            seriestype = :scatter,
+            markersize = 1.5,
+            markerstrokewidth = 0,
+            dpi = 1000)
+
+    savefig("PopulationDivergence.png")
+end
+
+function population_divergence()
+    trials = get_trials()
+    num_trials = length(trials)
+
+    all_divergences = []
+    all_times = []    
+    
+    for trial_id in trials
+        println("Population Divergence:")
+
+        snapshot_ids = get_snapshot_ids(data, trial_id)
+        num_snapshots = length(snapshot_ids)
+
+        last_snaphot_id = snapshot_ids[end]
+        last_snapshot = get_snapshot(data, last_snaphot_id)
+        last_distribution = get_genotype_distribution(last_snapshot)
+
+        divergences = SharedArray{Float64}(num_snapshots)
+        times = SharedArray{UInt64}(num_snapshots)
+
+        @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
+            current_snapshot = get_snapshot(data, snapshot_id)
+            current_time = get_time(current_snapshot)
+            
+            current_distribution = get_genotype_distribution(current_snapshot)
+            current_distance = _wasserstein(last_distribution, current_distribution, Levenshtein())
+
+            divergences[i] = current_distance
+            times[i] = current_time
+        end
+
+        push!(all_divergences, divergences)
+        push!(all_times, times)
+    end
+    
+    serialize("PopulationDivergence", (trials, all_times, all_divergences))
+    
+    plot(all_times, all_divergences, 
+            title = "Population Divergence",
+            label = "",
+            xguide = "Time",
+            yguide = "Population Divergence (Wasserstein)",
+            seriestype = :scatter,
+            markersize = 1.5,
+            markerstrokewidth = 0,
+            dpi = 1000)
+
+    savefig("PopulationDivergence.png")
 end
 
 # genotype_id_1 = "4154df3571b1ddce463713e5e713a0d8d4e80c465bdae473b87502b8160e7aeb"
