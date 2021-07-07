@@ -44,7 +44,6 @@ end
 
 function perform!(::CrossOver, model::GebModel, parent_1::GebOrganism, activation)
     if activation < CROSS_OVER_THRESHOLD return end
-    
     parent_2 = _get_organism_in_front(model, parent_1)
 
     if parent_2 === nothing return end

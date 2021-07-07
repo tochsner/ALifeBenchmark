@@ -9,13 +9,9 @@ struct GebbianEnvironment <: Environment end
 
 get_time(gebbian_model::GebModel) = gebbian_model.time
 get_organisms(gebbian_model::GebModel) = [o for o in gebbian_model.organisms]
-get_organism_ids(gebbian_model::GebModel) = [o.key for o in gebbian_model.organisms]
 
 function get_id(::GebModel, gebbian_organism::GebOrganism)
     gebbian_organism.key
-end
-function get_id(::GebModel, gebbian_organisms::Vector{GebOrganism})
-    [o.key for o in gebbian_organisms]
 end
 function get_genotype_id(::GebModel, gebbian_organism::GebOrganism)
     gebbian_organism.genotype
@@ -23,7 +19,7 @@ end
 function get_genotype(gebbian_model::GebModel, gebbian_organism::GebOrganism)
     gebbian_organism.genotype
 end
-function get_parent_genotype(::GebModel, gebbian_organism::GebOrganism)
+function get_parent_genotype_id(::GebModel, gebbian_organism::GebOrganism)
     bytes2hex.(sha256.(gebbian_organism.parent_genotypes))
 end
 function get_position(::GebModel, gebbian_organism::GebOrganism)

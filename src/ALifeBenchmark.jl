@@ -11,7 +11,7 @@ module ALifeBenchmark
 
 export load_collected_data, save_calculated
 
-export get_genotype, get_snapshot_ids
+export get_genotype, get_snapshot_ids, get_time, get_snapshot
 
 export get_phenotype_similarity, get_most_frequent_genotypes, get_reachable_diversity
 export get_reachable_fitness, get_snapshot, get_T_similarity, get_evolutionary_potential
@@ -58,7 +58,7 @@ include("utils/organism.jl")
 # include("analysis/selective_factors.jl")
 
 include("analysis/config.jl")
-
+include("logging/statistic_model.jl")
 include("logging/collect_distribution.jl")
 include("logging/logger.jl")
 include("logging/run_logger.jl")
