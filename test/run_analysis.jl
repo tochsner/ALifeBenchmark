@@ -34,6 +34,8 @@ function level_of_adaption()
         times[i] = time
     end
 
+    serialize("LevelofAdaption", (times, adaptions))
+
     plot(times, adaptions, 
             title = "Level Of Adaption",
             label = "",
@@ -43,7 +45,6 @@ function level_of_adaption()
             dpi = 600)
     savefig("LevelOfAdaption", )
 end
-
 
 # genotype_id_1 = "4154df3571b1ddce463713e5e713a0d8d4e80c465bdae473b87502b8160e7aeb"
 # genotype_id_2 = "834dcac3370f9dd44eba227de14f6496d372446c3018a2fe19ffe77a4f028429"

@@ -53,9 +53,6 @@ function add_logged_organisms(data::CollectedData, trial_id)
     
             logger = deserialize(LOGGER_FOLDER * file)
             append!(logged_organisms, values(logger.logged_organisms_alive))
-
-            println(i)
-            i += 1
         end
 
         println(LOGGER_FOLDER * trial_id * "compact")
