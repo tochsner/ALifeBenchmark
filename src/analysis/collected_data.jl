@@ -11,9 +11,11 @@ struct CollectedData
     genotypes::Dict{String, Any}
     trial_ids::Vector{String}
 
+    lock::ReentrantLock
+
     phenotype_similarities::Dict{Tuple{String, String}, PhenotypeSimilarity}
 
-    CollectedData() = new([], Dict(), Dict(), [], Dict())
+    CollectedData() = new([], Dict(), Dict(), [], Dict(), ReentrantLock())
 end
 
 function load_collected_data(; load_logged_organisms = true)
@@ -67,33 +69,37 @@ function add_logged_organisms(data::CollectedData, trial_id)
 end
 
 function get_genotype(data::CollectedData, genotype_id)
-    if haskey(data.genotypes, genotype_id) 
-        return data.genotypes[genotype_id]
-    end
+    lock(data.lock) do
+        if haskey(data.genotypes, genotype_id) 
+            return data.genotypes[genotype_id]
+        end
+            
+        genotype = deserialize(GENOTYPE_FOLDER * genotype_id)
+        data.genotypes[genotype_id] = genotype
         
-    genotype = deserialize(GENOTYPE_FOLDER * genotype_id)
-    data.genotypes[genotype_id] = genotype
-
-    return genotype
+        return genotype
+    end
 end
 
 function get_snapshot(data::CollectedData, snapshot_id; cache = true)
-    if haskey(data.snapshots, snapshot_id)
-        return data.snapshots[snapshot_id]
-    end
+    lock(data.lock) do
+        if haskey(data.snapshots, snapshot_id)
+            return data.snapshots[snapshot_id]
+        end
 
-    for trial_id in data.trial_ids
-        filename = trial_id * "_" * string(snapshot_id)
+        for trial_id in data.trial_ids
+            filename = trial_id * "_" * string(snapshot_id)
 
-        if isfile(SNAPSHOTS_FOLDER * filename)
-            snapshot = deserialize(SNAPSHOTS_FOLDER * filename)
-            set_logger!(snapshot, DoNothingLogger())
+            if isfile(SNAPSHOTS_FOLDER * filename)
+                snapshot = deserialize(SNAPSHOTS_FOLDER * filename)
+                set_logger!(snapshot, DoNothingLogger())
 
-            if cache
-                data.snapshots[snapshot_id] = snapshot
+                if cache
+                    data.snapshots[snapshot_id] = snapshot
+                end
+
+                return snapshot
             end
-
-            return snapshot
         end
     end
 end
@@ -112,7 +118,7 @@ function get_snapshot_ids(data::CollectedData)
     return snapshot_ids
 end
 
-function get_snapshot_ids(data::CollectedData, trial_id::String)
+function get_snapshot_ids(_::CollectedData, trial_id::String)
     snapshot_ids = []
 
     for filename in readdir(SNAPSHOTS_FOLDER)
