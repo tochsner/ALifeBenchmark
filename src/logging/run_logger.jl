@@ -3,7 +3,7 @@ import Serialization
 mutable struct RunLogger <: Logger
     trial_id
     logged_organisms_alive    
-    logged_organisms_dead    
+    logged_organisms_dead
 
     RunLogger(trial_id) = new(string(trial_id), Dict(), Dict())
 end
@@ -53,10 +53,7 @@ function log_death(logger::RunLogger, model, organism)
     organism_id = get_id(model, organism)
 
     if haskey(logger.logged_organisms_alive, organism_id)
-        logger.logged_organisms_dead[organism_id] = logger.logged_organisms_alive[organism_id]
         delete!(logger.logged_organisms_alive, organism_id)
-        
-        logger.logged_organisms_dead[organism_id].time_death = time
     end
 end
 

@@ -12,7 +12,7 @@ function execute!(model::GebModel)
     end
     
     shuffle(model.organisms)
-    organisms_in_batch = [(i, o) for (i, o) in enumerate(model.organisms)] # model.organisms[((batch - 1)*NUM_THREADS_GEB + 1):min(end, batch*NUM_THREADS_GEB)]
+    organisms_in_batch = [(i, o) for (i, o) in enumerate(model.organisms)]
     
     activations_in_batch = SharedArrays.SharedArray{Float64}(length(organisms_in_batch), 4*MAX_NEURONS)
     activation_size_in_batch = SharedArrays.SharedArray{UInt8}(length(organisms_in_batch))
@@ -24,11 +24,11 @@ function execute!(model::GebModel)
         activation_size_in_batch[i] = 0
     end
     
-    @threads for (i, organism) in organisms_in_batch
+    for (i, organism) in organisms_in_batch
         develop_nodes!(organism.network, organism.rules)
     end
     
-    @threads for (i, organism) in organisms_in_batch
+    for (i, organism) in organisms_in_batch
         activations = determine_input_activations(model, organism)
         num_outputs = length(activations)
         
@@ -36,7 +36,7 @@ function execute!(model::GebModel)
         activation_size_in_batch[i] = num_outputs
     end
     
-    @threads for (i, organism) in organisms_in_batch
+    for (i, organism) in organisms_in_batch
         activate_inputs!(organism.network, activations_in_batch[i, 1:activation_size_in_batch[i]])
     end
 
@@ -48,5 +48,5 @@ function execute!(model::GebModel)
     end
 
     model.time += 1
-    log_step(model.logger, model)
+    log_step(model.logger, model, false)
 end

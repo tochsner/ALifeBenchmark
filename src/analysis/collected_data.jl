@@ -43,6 +43,8 @@ function add_logged_organisms(data::CollectedData, trial_id)
     else
         logged_organisms = []
 
+        i = 0
+
         for file in readdir(LOGGER_FOLDER)
             if occursin("compact", file) || isfile(LOGGER_FOLDER * file) == false continue end
             
@@ -50,9 +52,13 @@ function add_logged_organisms(data::CollectedData, trial_id)
             if current_trial_id != trial_id continue end
     
             logger = deserialize(LOGGER_FOLDER * file)
-            append!(logged_organisms, [o for o in values(logger.logged_organisms_dead) if o.snapshot_id != "-1"])
+            append!(logged_organisms, values(logger.logged_organisms_alive))
+
+            println(i)
+            i += 1
         end
 
+        println(LOGGER_FOLDER * trial_id * "compact")
         serialize(LOGGER_FOLDER * trial_id * "compact", logged_organisms)
 
         append!(data.logged_organisms, logged_organisms)
@@ -80,7 +86,7 @@ function get_snapshot(data::CollectedData, snapshot_id; cache = true)
 
         if isfile(SNAPSHOTS_FOLDER * filename)
             snapshot = deserialize(SNAPSHOTS_FOLDER * filename)
-            clean_snapshot!(snapshot)
+            set_logger!(snapshot, DoNothingLogger())
 
             if cache
                 data.snapshots[snapshot_id] = snapshot
