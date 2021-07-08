@@ -1,29 +1,56 @@
-function estimate(get_sample_estimation, rel_tolerance, min_samples, max_samples, samples_per_step = 1; print_progress = false)
-    merge_estimation(sample_estimation, estimation, num_samples) = (estimation*num_samples + sample_estimation) / (num_samples + samples_per_step)
-    get_change(estimation, old_estimation) = abs(old_estimation - estimation) / max(EPS, old_estimation)
-
-    estimate(get_sample_estimation, merge_estimation, get_change, 0, rel_tolerance, min_samples, max_samples, samples_per_step, print_progress = print_progress)
+function estimate(get_sample, rel_tolerance, min_samples, max_samples; print_progress = false)
+    estimate(get_sample, get_new_estimation, get_estimation_variance, rel_tolerance, min_samples, max_samples, print_progress = print_progress)
 end
 
-function estimate(get_sample_estimation, merge_estimation, get_change, initial_estimation, tolerance, min_samples, max_samples, samples_per_step = 1; print_progress = false)
-    estimation = deepcopy(initial_estimation)
+function get_new_estimation(sample::Number, previous_samples, previous_estimation)
+    if length(previous_samples) == 0
+        sample
+    else
+        (sum(previous_samples) + sample) / (length(previous_samples) + 1)
+    end
+end
+function get_new_estimation(sample::Vector{T}, previous_samples, previous_estimation) where {T <: Number}
+    if length(previous_samples) == 0
+        mean(sample)
+    else
+        (sum(previous_samples) + sum(sample)) / (length(previous_samples) + length(sample))
+    end
+end
 
+function get_estimation_variance(sample, previous_samples)
+    if length(previous_samples) + length(sample) <= 1 return Inf end
+
+    all_samples = [previous_samples ; sample]
+    
+    n = length(all_samples)
+    mean = sum(all_samples) / n
+
+    return 1 / (n * (n - 1)) * sum([(s - mean)^2 for s in all_samples])  
+end
+
+function estimate(get_sample, get_new_estimation, get_estimation_variance, tolerance, min_samples, max_samples; print_progress = false)
+    previous_samples = []
     num_samples = 0
-    change = 2*tolerance
 
-    while (num_samples <= min_samples || tolerance < change) && num_samples <= max_samples
-        old_estimation = deepcopy(estimation)
-        
-        sample_estimation = get_sample_estimation()
-        estimation = merge_estimation(sample_estimation, estimation, num_samples)
-        
-        change = get_change(estimation, old_estimation)
-        num_samples += samples_per_step
+    estimation = 0
+    estimation_variance = 2*tolerance
+    
+    while (num_samples <= min_samples || tolerance < estimation_variance) && num_samples <= max_samples
+        new_sample = get_sample()
+
+        estimation = get_new_estimation(new_sample, previous_samples, estimation)
+        estimation_variance = get_estimation_variance(new_sample, previous_samples)
+
+        _add_sample!(previous_samples, new_sample)
+        num_samples = length(previous_samples)
 
         if print_progress
-            println(change)
+            println("$estimation_variance \t $new_sample \t $estimation")
         end
     end
 
     return estimation
 end
+
+_add_sample!(previous_samples::Vector, new_sample) = push!(previous_samples, new_sample)
+_add_sample!(previous_samples::Vector, new_sample::Vector) = append!(previous_samples, new_sample)
