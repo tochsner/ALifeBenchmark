@@ -20,11 +20,11 @@ function plot_result(times, values, name, trial_id)
             markersize = 1.5,
             markerstrokewidth = 0,
             dpi = 1000)
-    savefig("$name_$trial_id")
+    savefig("$name$trial_id")
 end
 
 function save_result(times, values, name, trial_id)
-    serialize("$name_$trial_id", (times, values))
+    serialize("$name$trial_id", (times, values))
 end
 
 function level_of_adaption(trial_id)
@@ -38,7 +38,7 @@ function level_of_adaption(trial_id)
     adaptions = SharedArray{Float64}(num_snapshots)
     times = SharedArray{UInt64}(num_snapshots)
 
-    @thraeds for (i, snapshot_id) in unique(enumerate(snapshot_ids))
+    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
         adaption = get_adaption_of_snapshot(data, last_snaphot_id, snapshot_id, 0.1, 15, 200)
         time = get_time(get_snapshot(data, snapshot_id))
 
@@ -103,9 +103,9 @@ function population_divergence(trial_id)
 end
 
 trial_id = "12433992799852588"
-name = "Level of Adaption"
+name = "ReachableFitness"
 
-times, values = level_of_adaption(trial_id)
+times, values = reachable_fitness(trial_id)
 plot_result(times, values, name, trial_id)
 save_result(times, values, name, trial_id)
 

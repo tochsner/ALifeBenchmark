@@ -22,7 +22,6 @@ function get_parent_genotype_id(::TierraModel, tierrian_organism::TierrianOrgani
     tierrian_organism.parent_hash
 end
 
-
 function get_position(::TierraModel, tierrian_organism::TierrianOrganism)
     TierrianPosition(tierrian_organism.start_address, tierrian_organism.length)
 end

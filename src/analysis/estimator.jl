@@ -9,7 +9,7 @@ function get_new_estimation(sample::Number, previous_samples, previous_estimatio
         (sum(previous_samples) + sample) / (length(previous_samples) + 1)
     end
 end
-function get_new_estimation(sample::Vector{T}, previous_samples, previous_estimation) where {T <: Number}
+function get_new_estimation(sample::Vector, previous_samples, previous_estimation)
     if length(previous_samples) == 0
         mean(sample)
     else

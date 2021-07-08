@@ -11,9 +11,12 @@ function get_fitness(snapshot, key_to_replace::UInt64, new_genotype)
     return fitness
 end
 function get_fitness(snapshot, organism)
-    num_daughters = length(get_daughters(snapshot, organism))
+    num_reproducing_daughters = length([
+        d for d in get_daughters(snapshot, organism) 
+        if get_genotype_id(snapshot, organism) == get_genotype_id(snapshot, d) || !isempty(get_daughters(snapshot, d))
+    ])
     age = get_age(snapshot, organism)
-    fitness = num_daughters / age
+    fitness = num_reproducing_daughters / age
 
     return age == 0 ? 0 : fitness
 end
@@ -22,6 +25,7 @@ function simulate_snapshot!(termination_predicate, snapshot, logger = DoNothingL
     snapshot = deepcopy(snapshot)
     set_logger!(snapshot, logger)
     run_until!(termination_predicate, snapshot)
+    return snapshot
 end
 
 function simulate_organism!(snapshot, abstracted_organism_to_replace::Organism, new_genotype)
@@ -32,10 +36,17 @@ function simulate_organism!(snapshot, key_to_replace::UInt64, new_genotype)
 
     new_organism = replace_organism!(snapshot, key_to_replace, new_genotype)
 
-    # run simulation until death of the new organism
+    # run simulation until death of the new organism and its (non-identical) children
+    # (we assume that identical children are able to reproduce themselves)
 
     run_until!(snapshot) do snapshot
-        !(new_organism in get_organisms(snapshot))
+        living_organisms = get_organisms(snapshot)
+
+        return !(new_organism in living_organisms) &&
+                any([
+                    get_genotype_id(snapshot, new_organism) != get_genotype_id(snapshot, d) && d in get_organisms(snapshot) 
+                    for d in get_daughters(snapshot, new_organism)
+                ])
     end
 
     return new_organism
