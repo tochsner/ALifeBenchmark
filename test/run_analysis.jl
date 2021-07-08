@@ -1,19 +1,19 @@
 using ALifeBenchmark
-using Random
 import SharedArrays.SharedArray
 using Plots
 using Serialization
 import Base.Threads.@threads
 using StringDistances: Levenshtein
 
-println("Loading collected data...")
+using Serialization
+
 data = load_collected_data(load_logged_organisms = false)
-println("Colleted data loaded.\n")
+
 
 TRIAL_ID = "12433992799852588"
 
 function level_of_adaption()
-    println("Level of Adaption:")
+    @info "LEVEL OF ADAPTION"
 
     snapshot_ids = get_snapshot_ids(data, TRIAL_ID)
     num_snapshots = length(snapshot_ids)
@@ -23,27 +23,17 @@ function level_of_adaption()
     adaptions = SharedArray{Float64}(num_snapshots)
     times = SharedArray{UInt64}(num_snapshots)
 
-    println(num_snapshots)
-
-    count = Threads.Atomic{Int}(0)
-    l = Threads.ReentrantLock()
-
-    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids[1:20]))
-        adaption = get_adaption_of_snapshot(data, last_snaphot_id, snapshot_id, 0.1, 10, 200)
+    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
+        adaption = get_adaption_of_snapshot(data, last_snaphot_id, snapshot_id, 0.1, 20, 200)
         time = get_time(get_snapshot(data, snapshot_id))
 
-        println(time, "\t", adaption)
+        @info "$time \t $adaption"
 
-        Threads.atomic_add!(count, 1)
-
-
-        lock(l) do
-            adaptions[i] = adaption
-            times[i] = time
-        end
+        adaptions[i] = adaption
+        times[i] = time
     end
 
-    serialize("LevelofAdaption", (times, adaptions))
+    serialize("LevelOfAdaption", (times, adaptions))
 
     plot(times, adaptions, 
             title = "Level Of Adaption",
