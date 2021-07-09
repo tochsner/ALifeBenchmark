@@ -60,12 +60,10 @@ function get_reachable_fitness(data::CollectedData, snapshot_id::String, rel_tol
     return reachable_fitness
 end
 
-function should_terminate(snapshot)
-    logger = get_logger(snapshot) 
-    
-    return isempty(logger.original_organisms_alive) && 
-            isempty(logger.direct_children_alive) && 
-            isempty(logger.direct_grandchildren_alive)
+function should_terminate(logger::ReachableFitnessLogger, snapshot)    
+    isempty(logger.original_organisms_alive) && 
+    isempty(logger.direct_children_alive) && 
+    isempty(logger.direct_grandchildren_alive)
 end
 
 function log_step(::ReachableFitnessLogger, model) end

@@ -17,7 +17,7 @@ function get_new_estimation(sample::Vector, previous_samples, previous_estimatio
     end
 end
 
-function get_estimation_variance(sample, previous_samples)
+function get_estimation_variance(sample, previous_samples, estimate)
     if length(previous_samples) + length(sample) <= 1 return Inf end
 
     all_samples = [previous_samples ; sample]
@@ -25,7 +25,7 @@ function get_estimation_variance(sample, previous_samples)
     n = length(all_samples)
     mean = sum(all_samples) / n
 
-    return 1 / (n * (n - 1)) * sum([(s - mean)^2 for s in all_samples])  
+    return 1 / (n * (n - 1)) * sum([(s - mean)^2 for s in all_samples]) / mean  
 end
 
 function estimate(get_sample, get_new_estimation, get_estimation_variance, tolerance, min_samples, max_samples; print_progress = false)
@@ -36,16 +36,22 @@ function estimate(get_sample, get_new_estimation, get_estimation_variance, toler
     estimation_variance = 2*tolerance
     
     while (num_samples <= min_samples || tolerance < estimation_variance) && num_samples <= max_samples
-        new_sample = get_sample()
+        try
+            new_sample = get_sample()
 
-        estimation = get_new_estimation(new_sample, previous_samples, estimation)
-        estimation_variance = get_estimation_variance(new_sample, previous_samples)
+            estimation = get_new_estimation(new_sample, previous_samples, estimation)
+            estimation_variance = get_estimation_variance(new_sample, previous_samples, estimation)
 
-        _add_sample!(previous_samples, new_sample)
-        num_samples = length(previous_samples)
+            _add_sample!(previous_samples, new_sample)
+            num_samples = length(previous_samples)
 
-        if print_progress
-            @info "$estimation_variance \t $new_sample \t $estimation"
+            if print_progress
+                println("$estimation_variance \t $new_sample \t $estimation")
+            end
+        catch e
+            if !isa(e, SimulationExpection)
+                rethrow(e)
+            end
         end
     end
 

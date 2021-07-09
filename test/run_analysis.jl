@@ -27,6 +27,10 @@ function save_result(times, values, name, trial_id)
     serialize("$name$trial_id", (times, values))
 end
 
+"""
+STATISTICS
+"""
+
 function level_of_adaption(trial_id)
     @info "LEVEL OF ADAPTION"
 
@@ -93,7 +97,7 @@ function population_divergence(trial_id)
         current_distribution = get_genotype_distribution(current_snapshot)
         current_distance = _wasserstein(last_distribution, current_distribution, Levenshtein())
 
-        @info "$current_distance \t $current_distance"
+        @info "$current_time \t $current_distance"
 
         divergences[i] = current_distance
         times[i] = current_time
@@ -102,10 +106,56 @@ function population_divergence(trial_id)
     return (times, divergences)
 end
 
-trial_id = "12433992799852588"
-name = "ReachableFitness"
+function reachable_diversity(trial_id)
+    @info "REACHABLE DIVERSITY:"
 
-times, values = reachable_fitness(trial_id)
+    snapshot_ids = get_snapshot_ids(data, trial_id)
+    num_snapshots = length(snapshot_ids)
+
+    reachable_diversities = SharedArray{Float64}(num_snapshots)
+    times = SharedArray{UInt64}(num_snapshots)
+
+    for (i, snapshot_id) in unique(enumerate(snapshot_ids))
+        current_time = get_time(get_snapshot(data, snapshot_id))
+        current_diversity = get_reachable_diversity(data, snapshot_id, 0.01, 50, 500)
+
+        @info "$current_time \t $current_diversity"
+
+        reachable_diversities[i] = current_diversity
+        times[i] = current_time
+    end
+
+    return (times, reachable_diversities)
+end
+
+function evolutionary_potential(trial_id)
+    @info "EVOLUTIONARY POTENTIAL:"
+
+    snapshot_ids = get_snapshot_ids(data, trial_id)
+    num_snapshots = length(snapshot_ids)
+
+    evolutionary_potentials = SharedArray{Float64}(num_snapshots)
+    times = SharedArray{UInt64}(num_snapshots)
+
+    for (i, snapshot_id) in unique(enumerate(snapshot_ids))
+        current_time = get_time(get_snapshot(data, snapshot_id))
+        current_potential = get_evolutionary_potential(data, snapshot_id, 600_000, 0.01, 50, 500)
+
+        @info "$current_time \t $current_potential"
+
+        evolutionary_potentials[i] = current_potential
+        times[i] = current_time
+    end
+
+    return (times, evolutionary_potentials)
+end
+
+trial_id = "12433992799852588"
+name = "EvolutionaryPotential"
+
+# add_logged_organisms(data, trial_id)
+
+times, values = evolutionary_potential(trial_id)
 plot_result(times, values, name, trial_id)
 save_result(times, values, name, trial_id)
 

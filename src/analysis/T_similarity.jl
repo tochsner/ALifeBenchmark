@@ -2,27 +2,18 @@ using OptimalTransport: wasserstein
 using Distributions: Categorical
 using StringDistances: Levenshtein
 
-function get_T_similarity(snapshot_1, snapshot_2, T, abs_tolerance, min_samples, max_samples)
-    distribution_1 = get_genotype_distribution(snapshot_1, T, abs_tolerance, min_samples, max_samples)
-    distribution_2 = get_genotype_distribution(snapshot_2, T, abs_tolerance, min_samples, max_samples)
+function get_T_similarity(snapshot_1, snapshot_2, T)
+    distribution_1 = get_genotype_distribution(snapshot_1, T)
+    distribution_2 = get_genotype_distribution(snapshot_2, T)
 
     T_similarity = _wasserstein(distribution_1, distribution_2, Levenshtein())
 
     return T_similarity
 end
 
-function get_genotype_distribution(snapshot, T, abs_tolerance, min_samples, max_samples)
-    distribution = Dict()
-
-    distribution = estimate(merge_distribution, _kullback_leibler, Dict([] => 1), abs_tolerance, min_samples, max_samples, print_progress = false) do
-        @time resulting_snapshot = run_n_timesteps(snapshot, T)
-        
-        sample_distribution = get_genotype_distribution(resulting_snapshot)        
-
-        return sample_distribution
-    end
-
-    return distribution
+function get_genotype_distribution(snapshot, T)
+    @time run_n_timesteps!(snapshot, T)
+    return get_genotype_distribution(snapshot)        
 end
 
 function get_genotype_distribution(snapshot)
@@ -43,10 +34,14 @@ function get_genotype_distribution(snapshot)
     return distribution
 end
 
-function merge_distribution(sample_distribution, distribution, num_previous_samples)
+function merge_distribution(sample_distribution, previous_sample_distributions, previous_estimation)
+    num_previous_samples = length(previous_sample_distributions)
+    
+    if num_previous_samples == 0 return sample_distribution end
+
     merged_distribution = Dict()
 
-    for (key, value) in distribution
+    for (key, value) in previous_estimation
         merged_distribution[key] = value*num_previous_samples /  (num_previous_samples + 1)
     end
    
@@ -61,6 +56,16 @@ function merge_distribution(sample_distribution, distribution, num_previous_samp
     _normalize_distribution!(merged_distribution)
 
     return merged_distribution
+end
+
+function get_distribution_variance(sample_distribution, previous_sample_distributions, estimate_distribution)
+    if length(previous_sample_distributions) == 0 return Inf end
+
+    all_samples = [sample_distribution ; previous_sample_distributions]
+    
+    n = length(all_samples)
+
+    return 1 / (n * (n - 1)) * sum([_kullback_leibler(estimate, s) for s in all_samples])
 end
 
 function _normalize_distribution!(distribution)

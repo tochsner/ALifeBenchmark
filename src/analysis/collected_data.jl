@@ -45,7 +45,7 @@ end
 function add_logged_organisms(data::CollectedData, trial_id)
     if isfile(LOGGER_FOLDER * trial_id * "compact")
         logged_organisms = deserialize(LOGGER_FOLDER * trial_id * "compact")
-        append!(data.logged_organisms, logged_organisms)
+        append!(data.logged_organisms, [l for l in logged_organisms if l.snapshot_id != -1])
     else
         logged_organisms = []
 

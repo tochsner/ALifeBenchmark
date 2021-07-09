@@ -9,42 +9,34 @@ struct ReachableDiversityLogger <: Logger
     end
 end
 
-function get_reachable_diversity(data::CollectedData, num_results::Integer, rel_tolerance, min_samples, max_samples)
-    results = []
-    
-    for snapshot_id in sample_snapshot_ids(data, num_results)
-        push!(results, (snapshot_id, get_reachable_diversity(data, snapshot_id, rel_tolerance, min_samples, max_samples)))
-        save_calculated(data)
-    end
-
-    return results
-end
-
 function get_reachable_diversity(data::CollectedData, snapshot_id::String, rel_tolerance, min_samples, max_samples)
     snapshot = get_snapshot(data, snapshot_id)
 
     reachable_diversity = estimate(rel_tolerance, min_samples, max_samples, print_progress = true) do
         logger = ReachableDiversityLogger(snapshot)
-        run_until(snapshot, should_terminate, logger)
+        simulate_snapshot!(should_terminate, snapshot, logger)
         
         while length(logger.child_genotypes) < 2
             logger = ReachableDiversityLogger(snapshot)
-            run_until(snapshot, should_terminate, logger)
+            simulate_snapshot!(should_terminate, snapshot, logger)
         end
-
-        println(length(logger.child_genotypes))
         
-        sum_phenotype_similarities = 0
-        num_samples_per_run = 10
-
+        phenotype_similarities = []
+        num_samples_per_run = 2
+        
         for _ in 1:num_samples_per_run
-            (genotype_1_id, genotype_1) = rand(logger.child_genotypes)
-            (genotype_2_id, genotype_2) = rand(logger.child_genotypes)
-
-            sum_phenotype_similarities += get_phenotype_similarity(data, genotype_1_id, genotype_2_id, genotype_1, genotype_2, rel_tolerance = 0.01)
+            (_, genotype_1) = rand(logger.child_genotypes)
+            (_, genotype_2) = rand(logger.child_genotypes)
+            
+            sample_to_test = sample_organism(data)
+            snapshot_to_test = get_snapshot(data, sample_to_test.snapshot_id)
+            
+            phenotype_similarity = (get_fitness(snapshot_to_test, sample_to_test, genotype_1) - get_fitness(snapshot_to_test, sample_to_test, genotype_2))^2            
+            
+            push!(phenotype_similarities, phenotype_similarity)
         end
 
-        return sum_phenotype_similarities / num_samples_per_run
+        return phenotype_similarities
     end
 
     return reachable_diversity
