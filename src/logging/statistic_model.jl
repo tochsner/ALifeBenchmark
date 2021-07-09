@@ -1,3 +1,7 @@
+struct SimulationExpection <: Exception
+    message::String
+end
+
 get_organism_ids(snapshot) = [get_id(snapshot, o) for o in get_organisms(snapshot)]
 get_id(snapshot, organisms::Vector) = [get_id(snapshot, o) for o in organisms]
 
@@ -43,8 +47,10 @@ function simulate_organism!(snapshot, key_to_replace::UInt64, new_genotype)
         living_organisms = get_organisms(snapshot)
 
         return !(new_organism in living_organisms) &&
-                any([
-                    get_genotype_id(snapshot, new_organism) != get_genotype_id(snapshot, d) && d in get_organisms(snapshot) 
+                all([
+                    get_genotype_id(snapshot, new_organism) == get_genotype_id(snapshot, d) || 
+                    !(d in get_organisms(snapshot)) 
+                    
                     for d in get_daughters(snapshot, new_organism)
                 ])
     end

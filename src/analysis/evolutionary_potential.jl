@@ -10,39 +10,36 @@ struct EvolutionaryPotentialLogger <: Logger
     end
 end
 
-function get_evolutionary_potential(data::CollectedData, num_results::Integer, T::Integer)
-    results = []
-    
-    for snapshot_id in sample_snapshot_ids(data, num_results)
-        push!(results, (snapshot_id, get_evolutionary_potential(data, snapshot_id, T)))        
-    end
-
-    return results
-end
-
-function get_evolutionary_potential(data::CollectedData, snapshot_id::String, T::Integer)
+function get_evolutionary_potential(data::CollectedData, snapshot_id::String, T::Integer, rel_tolerance, min_samples, max_samples)
     snapshot = get_snapshot(data, snapshot_id)
 
-    logger = EvolutionaryPotentialLogger(snapshot)
-    run_until(snapshot, should_terminate, logger)
+    T_similarity = estimate(rel_tolerance, min_samples, max_samples, print_progress = true) do
+        logger = EvolutionaryPotentialLogger(snapshot)
+        simulate_snapshot!(should_terminate, snapshot, logger)
+        
+        while length(logger.children) == 0
+            logger = EvolutionaryPotentialLogger(snapshot)
+            simulate_snapshot!(should_terminate, snapshot, logger)
+        end
 
-    T_similarities = []
+        T_similarities = []
     
-    for child_id in logger.children
-        parent_genotype = logger.parent_genotype[child_id]
+        for child_id in logger.children
+            parent_genotype = logger.parent_genotype[child_id]
+    
+            snapshot_with_mutation = deepcopy(logger.snapshots[child_id])
+            snapshot_without_mutation = deepcopy(snapshot_with_mutation)
+            replace_organism!(snapshot_without_mutation, child_id, parent_genotype)
 
-        snapshot_with_mutation = deepcopy(logger.snapshots[child_id])
-        snapshot_without_mutation = deepcopy(snapshot_with_mutation)
-        replace_organism!(snapshot_without_mutation, child_id, parent_genotype)
+            T_similarity = get_T_similarity(snapshot_with_mutation, snapshot_without_mutation, T)
+    
+            push!(T_similarities, T_similarity)
+        end
 
-        T_similarity = get_T_similarity(snapshot_with_mutation, snapshot_without_mutation, T)
-
-        push!(T_similarities, T_similarity)
-
-        println(T_similarity)
+        return T_similarities
     end
 
-    return mean(T_similarities)
+    return T_similarity
 end
 
 should_terminate(logger::EvolutionaryPotentialLogger, snapshot) = length(logger.original_organisms_alive) == 0

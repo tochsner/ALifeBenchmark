@@ -62,6 +62,11 @@ function replace_organism!(model::TierraModel, key::UInt64, new_program::Vector{
     # TODO: same place
 
     new_key = add_organism!(model, new_program)
+
+    if new_key === nothing
+        throw(SimulationExpection("New organism cannot be created in Tierra -- not enough memory."))
+    end
+
     new_organism = model.organisms[new_key]
 
     return new_organism

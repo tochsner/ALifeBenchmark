@@ -11,13 +11,13 @@ end
 
 function get_phenotype_similarity(data::CollectedData, genotype_id_1::String, genotype_id_2::String, genotype_1, genotype_2; rel_tolerance = 0.05, min_samples = 10, max_samples = 100)
     if genotype_id_1 == genotype_id_2 return 0.0 end
-# 
+
     if haskey(data.phenotype_similarities, (genotype_id_1, genotype_id_2)) && 
         data.phenotype_similarities[(genotype_id_1, genotype_id_2)].precision <= rel_tolerance
         
         return data.phenotype_similarities[(genotype_id_1, genotype_id_2)].similarity
     end
-# 
+ 
     if haskey(data.phenotype_similarities, (genotype_id_2, genotype_id_1)) && 
         data.phenotype_similarities[(genotype_id_2, genotype_id_1)].precision <= rel_tolerance
     

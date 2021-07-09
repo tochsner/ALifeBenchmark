@@ -9,7 +9,7 @@ module ALifeBenchmark
 # export get_total_fitness_variance, get_abiotic_variance, get_mutational_variance, get_biotic_variance, get_inherent_variance
 
 
-export load_collected_data, save_calculated
+export load_collected_data, save_calculated, add_logged_organisms
 
 export get_genotype, get_snapshot_ids, get_time, get_snapshot, get_trials
 

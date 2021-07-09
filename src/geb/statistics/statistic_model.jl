@@ -124,13 +124,3 @@ function run_until(model::GebModel, termination_predicate, logger=DoNothingLogge
     return model
 end
 
-function run_n_timesteps(model::GebModel, n_timesteps, logger=DoNothingLogger())
-    model = deepcopy(model)
-    model.logger = logger
-
-    for _ in 1:n_timesteps
-        execute!(model)
-    end
-
-    return model
-end
