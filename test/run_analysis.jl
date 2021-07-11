@@ -46,8 +46,8 @@ function level_of_adaption(trial_id)
     times = SharedArray{UInt64}(num_snapshots)
 
     count = Threads.Atomic{Int}(0);
-    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids[1:5]))
-        adaption = get_adaption_of_snapshot(data, last_snaphot_id, snapshot_id, 0.001, 1, 5)
+    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
+        adaption = get_adaption_of_snapshot(data, last_snaphot_id, snapshot_id, 0.001, 50, 500)
         time = get_time(get_snapshot(data, snapshot_id))
 
         Threads.atomic_add!(count, 1)
