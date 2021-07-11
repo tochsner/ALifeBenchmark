@@ -120,7 +120,7 @@ function reachable_diversity(trial_id)
     reachable_diversities = SharedArray{Float64}(num_snapshots)
     times = SharedArray{UInt64}(num_snapshots)
 
-    for (i, snapshot_id) in unique(enumerate(snapshot_ids))
+    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
         current_time = get_time(get_snapshot(data, snapshot_id))
         current_diversity = get_reachable_diversity(data, snapshot_id, 0.001, 100, 500)
 
@@ -142,7 +142,7 @@ function evolutionary_potential(trial_id)
     evolutionary_potentials = SharedArray{Float64}(num_snapshots)
     times = SharedArray{UInt64}(num_snapshots)
 
-    for (i, snapshot_id) in unique(enumerate(snapshot_ids))
+    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
         current_time = get_time(get_snapshot(data, snapshot_id))
         current_potential = get_evolutionary_potential(data, snapshot_id, 600_000, 0.001, 50, 500)
 
