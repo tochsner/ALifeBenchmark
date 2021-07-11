@@ -16,7 +16,7 @@ export get_genotype, get_snapshot_ids, get_time, get_snapshot, get_trials
 export get_phenotype_similarity, get_most_frequent_genotypes, get_reachable_diversity
 export get_reachable_fitness, get_snapshot, get_T_similarity, get_evolutionary_potential
 export get_adaption_of_genotype, get_adaption_of_snapshot
-
+export is_reproducing
 
 export _wasserstein, get_genotype_distribution
 
@@ -76,6 +76,7 @@ include("analysis/reachable_fitness.jl")
 include("analysis/T_similarity.jl")
 include("analysis/evolutionary_potential.jl")
 include("analysis/level_of_adaption.jl")
+include("analysis/reproducability.jl")
 
 
 

@@ -4,10 +4,16 @@ function sample_organism(data::CollectedData)
     rand(data.logged_organisms)
 end
 
+
+function sample_snapshot_id(data::CollectedData)    
+    first(sample_snapshot_ids(data, 1))
+end
 function sample_snapshot_ids(data::CollectedData, num_samples)    
     all_snaphot_ids = get_snapshot_ids(data)
     rand(all_snaphot_ids, num_samples)
 end
+
+            
 
 function sample_organisms(data::CollectedData, num_samples)    
     rand(data.logged_organisms, num_samples)

@@ -42,11 +42,13 @@ function level_of_adaption(trial_id)
     adaptions = SharedArray{Float64}(num_snapshots)
     times = SharedArray{UInt64}(num_snapshots)
 
+    count = Threads.Atomic{Int}(0);
     @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
-        adaption = get_adaption_of_snapshot(data, last_snaphot_id, snapshot_id, 0.05, 15, 200)
+        adaption = get_adaption_of_snapshot(data, last_snaphot_id, snapshot_id, 0.001, 50, 500)
         time = get_time(get_snapshot(data, snapshot_id))
 
-        @info "$time \t $adaption"
+        Threads.atomic_add!(count, 1)
+        @info "$count[] \t $time \t $adaption"
 
         adaptions[i] = adaption
         times[i] = time
@@ -65,7 +67,7 @@ function reachable_fitness(trial_id)
     times = SharedArray{UInt64}(num_snapshots)
 
     @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
-        current_reachable_fitness = get_reachable_fitness(data, snapshot_id, 0.001, 500, 2000)
+        current_reachable_fitness = get_reachable_fitness(data, snapshot_id, 0.001, 50, 500)
         current_time = get_time(get_snapshot(data, snapshot_id))
 
         @info "$current_time \t $current_reachable_fitness"
@@ -117,7 +119,7 @@ function reachable_diversity(trial_id)
 
     for (i, snapshot_id) in unique(enumerate(snapshot_ids))
         current_time = get_time(get_snapshot(data, snapshot_id))
-        current_diversity = get_reachable_diversity(data, snapshot_id, 0.01, 50, 500)
+        current_diversity = get_reachable_diversity(data, snapshot_id, 0.001, 100, 500)
 
         @info "$current_time \t $current_diversity"
 
@@ -139,7 +141,7 @@ function evolutionary_potential(trial_id)
 
     for (i, snapshot_id) in unique(enumerate(snapshot_ids))
         current_time = get_time(get_snapshot(data, snapshot_id))
-        current_potential = get_evolutionary_potential(data, snapshot_id, 600_000, 0.01, 50, 500)
+        current_potential = get_evolutionary_potential(data, snapshot_id, 600_000, 0.001, 50, 500)
 
         @info "$current_time \t $current_potential"
 
@@ -150,12 +152,31 @@ function evolutionary_potential(trial_id)
     return (times, evolutionary_potentials)
 end
 
-trial_id = "12433992799852588"
-name = "EvolutionaryPotential"
+if length(ARGS) != 2
+    trial_id = "12433992799852588"
+    type_of_analysis = "LA"
+else
+    trial_id, type_of_analysis = ARGS
+end
 
-# add_logged_organisms(data, trial_id)
+if type_of_analysis == "LA"
+    name = "LevelOfAdaption"
+    func = level_of_adaption
+elseif type_of_analysis == "RF"
+    name = "ReachableFitness"
+    func = reachable_fitness
+elseif type_of_analysis == "RD"
+    name = "ReachableDiversity"
+    func = reachable_diversity
+elseif type_of_analysis == "PD"
+    name = "PopulationDivergence"
+    func = population_divergence
+elseif type_of_analysis == "EP"
+    name = "EvolutionaryPotential"
+    func = evolutionary_potential
+end
 
-times, values = evolutionary_potential(trial_id)
+times, valeus = func(trial_id)
 plot_result(times, values, name, trial_id)
 save_result(times, values, name, trial_id)
 
