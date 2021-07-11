@@ -4,6 +4,7 @@ using Plots
 using Serialization
 import Base.Threads.@threads
 using StringDistances: Levenshtein
+using Measures
 
 using Serialization
 
@@ -19,6 +20,8 @@ function plot_result(times, values, name, trial_id)
             seriestype = :scatter,
             markersize = 1.5,
             markerstrokewidth = 0,
+            size = (900, 600),
+            margin = 10mm,
             dpi = 1000)
     savefig("$name$trial_id")
 end
@@ -176,7 +179,7 @@ elseif type_of_analysis == "EP"
     func = evolutionary_potential
 end
 
-times, valeus = func(trial_id)
+times, values = func(trial_id)
 plot_result(times, values, name, trial_id)
 save_result(times, values, name, trial_id)
 

@@ -1,7 +1,7 @@
 function get_adaption_of_snapshot(data::CollectedData, snapshot_id, reference_snapshot_id, rel_tolerance, min_samples, max_samples)
     snapshot = get_snapshot(data, snapshot_id)    
     reference_snapshot = get_snapshot(data, reference_snapshot_id)    
-    
+
     all_organisms = get_organisms(snapshot)
     all_reference_organisms = get_organisms(reference_snapshot)
 
