@@ -28,8 +28,8 @@ function get_reachable_diversity(data::CollectedData, snapshot_id::String, rel_t
             (_, genotype_1) = rand(logger.child_genotypes)
             (_, genotype_2) = rand(logger.child_genotypes)
             
-            sample_to_test = sample_organism(data)
-            snapshot_to_test = get_snapshot(data, sample_to_test.snapshot_id)
+            snapshot_to_test = get_snapshot(data, sample_snapshot_id(data))
+            sample_to_test = rand(get_organisms(snapshot_to_test))
             
             phenotype_similarity = (get_fitness(snapshot_to_test, sample_to_test, genotype_1) - get_fitness(snapshot_to_test, sample_to_test, genotype_2))^2            
             
