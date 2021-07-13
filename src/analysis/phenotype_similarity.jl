@@ -1,15 +1,14 @@
 import Statistics
 using Base.Threads
 
-function get_phenotype_similarity(data::CollectedData, genotype_id_1::String, genotype_id_2::String; rel_tolerance = 0.05, min_samples = 10, max_samples = 100)
+function get_phenotype_similarity(data::CollectedData, genotype_id_1::String, genotype_id_2::String, rel_tolerance, min_samples, max_samples)
     genotype_1 = get_genotype(data, genotype_id_1)
     genotype_2 = get_genotype(data, genotype_id_2)
-    
-    get_phenotype_similarity(data, genotype_id_1, genotype_id_2, genotype_1, genotype_2, 
-                                rel_tolerance = rel_tolerance, min_samples = min_samples, max_samples = max_samples)
+
+    get_phenotype_similarity(data, genotype_id_1, genotype_id_2, genotype_1, genotype_2, rel_tolerance, min_samples, max_samples)
 end
 
-function get_phenotype_similarity(data::CollectedData, genotype_id_1::String, genotype_id_2::String, genotype_1, genotype_2; rel_tolerance = 0.05, min_samples = 10, max_samples = 100)
+function get_phenotype_similarity(data::CollectedData, genotype_id_1::String, genotype_id_2::String, genotype_1, genotype_2, rel_tolerance, min_samples, max_samples)
     if genotype_id_1 == genotype_id_2 return 0.0 end
 
     if haskey(data.phenotype_similarities, (genotype_id_1, genotype_id_2)) && 
@@ -24,18 +23,13 @@ function get_phenotype_similarity(data::CollectedData, genotype_id_1::String, ge
         return data.phenotype_similarities[(genotype_id_2, genotype_id_1)].similarity
     end
 
-    similarity = estimate(rel_tolerance, min_samples, max_samples, NUM_THREADS) do
-        samples = sample_organisms(data, NUM_THREADS)
-        snapshots = [get_snapshot(data, sample.snapshot_id) for sample in samples]
-        sample_similarities = zeros(NUM_THREADS)
+    similarity = estimate(rel_tolerance, min_samples, max_samples) do
+        snapshot_to_test = get_snapshot(data, sample_snapshot_id(data))
+        sample_to_test = get_id(snapshot_to_test, rand(get_organisms(snapshot_to_test)))
         
-        @threads for t in 1:NUM_THREADS
-            sample = samples[t]
-            snapshot = snapshots[t]
-            sample_similarities[t] = (get_fitness(snapshot, sample, genotype_1) - get_fitness(snapshot, sample, genotype_2))^2            
-        end
+        phenotype_similarity =  (get_fitness(snapshot_to_test, sample_to_test, genotype_1) - get_fitness(snapshot_to_test, sample_to_test, genotype_2))^2
 
-        return sum(sample_similarities)
+        return phenotype_similarity
     end
     
     data.phenotype_similarities[(genotype_id_1, genotype_id_2)] = PhenotypeSimilarity(similarity, rel_tolerance)
