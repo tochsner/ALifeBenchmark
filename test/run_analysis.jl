@@ -25,9 +25,24 @@ function plot_result(times, values, name, trial_id)
             dpi = 1000)
     savefig("$name$trial_id")
 end
+function plot_result(times_1, times_2, values, name, trial_id)
+    plot(times_1, times_2, 
+            marker_z  = values,
+            title = "",
+            label = "",
+            xguide = "Time",
+            yguide = name,
+            seriestype = :scatter,
+            markersize = 3,
+            markerstrokewidth = 0,
+            size = (900, 600),
+            margin = 10mm,
+            dpi = 1000)
+    savefig("$name$trial_id")
+end
 
-function save_result(times, values, name, trial_id)
-    serialize("$name$trial_id", (times, values))
+function save_result(data, name, trial_id)
+    serialize("$name$trial_id", data)
 end
 
 """
@@ -45,7 +60,7 @@ function level_of_adaption(trial_id)
     adaptions = SharedArray{Float64}(num_snapshots)
     times = SharedArray{UInt64}(num_snapshots)
 
-    count = Threads.Atomic{Int}(0);
+    count = Threads.Atomic{Int}(0)
     @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
         adaption = get_adaption_of_snapshot(data, last_snaphot_id, snapshot_id, 0.001, 50, 500)
         time = get_time(get_snapshot(data, snapshot_id))
@@ -155,6 +170,73 @@ function evolutionary_potential(trial_id)
     return (times, evolutionary_potentials)
 end
 
+function cross_population_divergence(trial_id)
+    @info "2D-POPULATION DIVERGENCE:"
+
+    snapshot_ids = get_snapshot_ids(data, trial_id)
+    num_snapshots = length(snapshot_ids)
+
+    divergences = SharedArray{Float64}(num_snapshots^2)
+    times_1 = SharedArray{UInt64}(num_snapshots^2)
+    times_2 = SharedArray{UInt64}(num_snapshots^2)
+
+    @threads for (i, snapshot_id_1) in unique(enumerate(snapshot_ids))
+        snapshot_1 = get_snapshot(data, snapshot_id_1)
+        time_1 = get_time(snapshot_1)
+        distribution_1 = get_genotype_distribution(snapshot_1)
+        
+        for (j, snapshot_id_2) in unique(enumerate(snapshot_ids))
+            snapshot_2 = get_snapshot(data, snapshot_id_2)
+            time_2 = get_time(snapshot_2)
+            distribution_2 = get_genotype_distribution(snapshot_2)
+            
+            current_distance = _wasserstein(distribution_1, distribution_2, Levenshtein())
+
+            
+            index = (i-1)*num_snapshots + j
+            
+            divergences[index] = current_distance
+            times_1[index] = time_1
+            times_2[index] = time_2
+        end
+        @info "2D-PD \t $time_1"
+    end
+
+    return (times_1, times_2, divergences)
+end
+
+function cross_level_of_adaption(trial_id)
+    @info "2D-Level of Adaption:"
+
+    snapshot_ids = get_snapshot_ids(data, trial_id)
+    num_snapshots = length(snapshot_ids)
+
+    adaptions = SharedArray{Float64}(num_snapshots^2)
+    times_1 = SharedArray{UInt64}(num_snapshots^2)
+    times_2 = SharedArray{UInt64}(num_snapshots^2)
+
+    @threads for (i, snapshot_id_1) in unique(enumerate(rand(snapshot_ids, 200)))
+        snapshot_1 = get_snapshot(data, snapshot_id_1)
+        time_1 = get_time(snapshot_1)
+        
+        for (j, snapshot_id_2) in unique(enumerate(rand(snapshot_ids, 200)))
+            snapshot_2 = get_snapshot(data, snapshot_id_2)
+            time_2 = get_time(snapshot_2)
+            
+            current_adaption = get_adaption_of_snapshot(data, snapshot_id_1, snapshot_id_2, 0.01, 20, 500)
+            
+            index = (i-1)*num_snapshots + j
+            
+            adaptions[index] = current_adaption
+            times_1[index] = time_1
+            times_2[index] = time_2
+        end
+        @info "2D-LA \t $time_1"
+    end
+
+    return (times_1, times_2, adaptions)
+end
+
 if length(ARGS) != 2
     trial_id = "12433992799852588"
     type_of_analysis = "LA"
@@ -177,10 +259,16 @@ elseif type_of_analysis == "PD"
 elseif type_of_analysis == "EP"
     name = "EvolutionaryPotential"
     func = evolutionary_potential
+elseif type_of_analysis == "2DPD"
+    name = "2DPopulationDivergence"
+    func = cross_population_divergence
+elseif type_of_analysis == "2DLA"
+    name = "2DLevelOfAdaption"
+    func = cross_level_of_adaption
 end
 
-times, values = func(trial_id)
-plot_result(times, values, name, trial_id)
-save_result(times, values, name, trial_id)
+result = func(trial_id)
+plot_result(result..., name, trial_id)
+save_result(result, name, trial_id)
 
 save_calculated(data)
