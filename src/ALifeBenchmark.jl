@@ -20,6 +20,8 @@ export is_reproducing
 
 export _wasserstein, get_genotype_distribution
 
+export save_offspring_log, build_genotype_graph, analyse_graph, calculate_phenotype_graph!, save_graph
+
 # Tierra
 
 export TierraModel
@@ -77,6 +79,8 @@ include("analysis/T_similarity.jl")
 include("analysis/evolutionary_potential.jl")
 include("analysis/level_of_adaption.jl")
 include("analysis/reproducability.jl")
+
+include("analysis/build_genotype_graph.jl")
 
 
 

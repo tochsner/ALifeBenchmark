@@ -54,7 +54,7 @@ function add_logged_organisms(data::CollectedData, trial_id)
             if occursin("compact", file) continue end
             if isfile(LOGGER_FOLDER * file * "c") continue end
             
-            current_trial_id = split(trial_id, "_")[1]
+            current_trial_id = split(file, "_")[1]
             if current_trial_id != trial_id continue end
     
             logger = deserialize(LOGGER_FOLDER * file)
@@ -134,4 +134,56 @@ end
 
 function save_calculated(data::CollectedData)
     serialize(CALCULATED_FOLDER * "phenotype_similarites", data.phenotype_similarities)
+end
+
+function save_offspring_log(data::CollectedData)
+    all_genotypes = Set()
+    offspring_parents = Dict()
+
+    for trial_id in data.trial_ids
+        @info trial_id
+        organism_genotypes = Dict()
+        i = 0        
+        
+        for file in readdir(LOGGER_FOLDER)
+            if isfile(LOGGER_FOLDER * file) == false continue end
+            if occursin("compact", file) continue end
+            if occursin("c", file) continue end
+            
+            current_trial_id = split(file, "_")[1]
+            if current_trial_id != trial_id continue end
+    
+            try
+                logger = deserialize(LOGGER_FOLDER * file)
+                
+                for (_, organism) in logger.logged_organisms_dead
+                    push!(all_genotypes, organism.genotype_id)
+                    organism_genotypes[organism.id] = organism.genotype_id
+
+                    if haskey(organism_genotypes, organism.parent_id) == false
+                        continue
+                    end
+
+                    parent_genotype_id = organism_genotypes[organism.parent_id]
+
+                    key = (parent_genotype_id, organism.genotype_id)
+
+                    if haskey(offspring_parents, key)
+                        offspring_parents[key] += 1
+                    else
+                        offspring_parents[key] = 1
+                    end
+                end
+                i += 1
+                l = length(all_genotypes)
+
+                @info "$i \t $l \t $file"
+            catch exp
+                @info exp                
+            end
+        end
+
+        serialize(CALCULATED_FOLDER * "all_genotypes", all_genotypes)
+        serialize(CALCULATED_FOLDER * "offspring_parents", offspring_parents)
+    end
 end

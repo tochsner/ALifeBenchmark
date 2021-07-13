@@ -25,7 +25,7 @@ function get_estimation_variance(sample, previous_samples, estimate)
     n = length(all_samples)
     mean = sum(all_samples) / n
 
-    return 1 / (n * (n - 1)) * sum([(s - mean)^2 for s in all_samples]) / mean  
+    return 1 / (n * (n - 1)) * sum([(s - mean)^2 for s in all_samples]) / max(EPS, mean)  
 end
 
 function estimate(get_sample, get_new_estimation, get_estimation_variance, tolerance, min_samples, max_samples; print_progress = false)
