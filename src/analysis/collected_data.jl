@@ -109,7 +109,9 @@ function get_snapshot_ids(data::CollectedData)
 
     for filename in readdir(SNAPSHOTS_FOLDER)
         trial_id, snapshot_id = split(filename, "_")
-        
+	
+	if trial_id == "4739122895933101" continue end       
+ 
         if trial_id in data.trial_ids
             push!(snapshot_ids, string(snapshot_id))
         end
