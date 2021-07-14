@@ -4,7 +4,7 @@ using Serialization
 using Dates
 import Random
 using Profile
-# using PProf
+using PProf
 
 create_model(logger) = GebModel(logger)
 function print_function(trial, step, model)
@@ -13,10 +13,12 @@ function print_function(trial, step, model)
     end
 end
 
-const NUM_ITERATIONS = 1e5
+const NUM_ITERATIONS = 5e3
 const NUM_TRIALS = 1
 
-# collect_distribution(create_model, execute!, print_function, NUM_ITERATIONS, NUM_TRIALS, 1)
-collect_distribution(create_model, execute!, print_function, NUM_ITERATIONS, NUM_TRIALS, 1)
+println("Start")
 
-# pprof(webport=58697)
+collect_distribution(create_model, execute!, print_function, 100, NUM_TRIALS, 1)
+@profile collect_distribution(create_model, execute!, print_function, NUM_ITERATIONS, NUM_TRIALS, 1)
+
+pprof(webport=58697)

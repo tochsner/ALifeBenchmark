@@ -1,8 +1,7 @@
-const MUTATE = false
+const MUTATE = true
 const COSMIC_RAYS_PROBABILITY = 1e-9
 const FLAW_PROBABILITY = 1e-4
 
-const NUM_THREADS = 4
 const SLICE_SIZE = 10
 
 const MAX_SEARCH_DISTANCE = 256
