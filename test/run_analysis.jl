@@ -215,15 +215,16 @@ function cross_level_of_adaption(trial_id)
     times_1 = SharedArray{UInt64}(num_snapshots^2)
     times_2 = SharedArray{UInt64}(num_snapshots^2)
 
-    @threads for (i, snapshot_id_1) in unique(enumerate(rand(snapshot_ids, 200)))
+    @threads for (i, snapshot_id_1) in unique(enumerate(rand(snapshot_ids, 50)))
         snapshot_1 = get_snapshot(data, snapshot_id_1)
         time_1 = get_time(snapshot_1)
         
-        for (j, snapshot_id_2) in unique(enumerate(rand(snapshot_ids, 200)))
+        
+        for (j, snapshot_id_2) in unique(enumerate(rand(snapshot_ids, 50)))
             snapshot_2 = get_snapshot(data, snapshot_id_2)
             time_2 = get_time(snapshot_2)
             
-            current_adaption = get_adaption_of_snapshot(data, snapshot_id_1, snapshot_id_2, 0.01, 20, 500)
+            current_adaption = get_adaption_of_snapshot(data, snapshot_id_1, snapshot_id_2, 0.01, 20, 50)
             
             index = (i-1)*num_snapshots + j
             
@@ -235,6 +236,31 @@ function cross_level_of_adaption(trial_id)
     end
 
     return (times_1, times_2, adaptions)
+end
+
+function genotype_entropy(trial_id)
+    @info "ENTROPY:"
+
+    snapshot_ids = get_snapshot_ids(data, trial_id)
+    num_snapshots = length(snapshot_ids)
+
+    entropies = SharedArray{Float64}(num_snapshots)
+    times = SharedArray{UInt64}(num_snapshots)
+
+    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
+        current_snapshot = get_snapshot(data, snapshot_id)
+        current_time = get_time(current_snapshot)
+        
+        current_distribution = get_genotype_distribution(current_snapshot)
+        current_entropy = get_entropy(current_distribution)
+
+        @info "$current_time \t $current_entropy"
+
+        entropies[i] = current_entropy
+        times[i] = current_time
+    end
+
+    return (times, entropies)
 end
 
 if length(ARGS) != 2
@@ -265,6 +291,9 @@ elseif type_of_analysis == "2DPD"
 elseif type_of_analysis == "2DLA"
     name = "2DLevelOfAdaption"
     func = cross_level_of_adaption
+elseif type_of_analysis == "EN"
+    name = "GenotypeEntropy"
+    func = genotype_entropy
 end
 
 result = func(trial_id)

@@ -13,16 +13,6 @@ struct ReachableFitnessLogger <: Logger
     end
 end
 
-function get_reachable_fitness(data::CollectedData, num_results::Integer, rel_tolerance, min_samples, max_samples)
-    results = []
-    
-    for snapshot_id in sample_snapshot_ids(data, num_results)
-        push!(results, (snapshot_id, get_reachable_fitness(data, snapshot_id, rel_tolerance, min_samples, max_samples)))        
-    end
-
-    return results
-end
-
 function get_reachable_fitness(data::CollectedData, snapshot_id::String, rel_tolerance, min_samples, max_samples)
     snapshot = get_snapshot(data, snapshot_id)
 
