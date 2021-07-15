@@ -214,24 +214,31 @@ function cross_level_of_adaption(trial_id)
     adaptions = SharedArray{Float64}(num_snapshots^2)
     times_1 = SharedArray{UInt64}(num_snapshots^2)
     times_2 = SharedArray{UInt64}(num_snapshots^2)
+    
+    count = Threads.Atomic{Int}(0)
 
-    @threads for (i, snapshot_id_1) in unique(enumerate(rand(snapshot_ids, 200)))
-        snapshot_1 = get_snapshot(data, snapshot_id_1)
+    @threads for (i, snapshot_id_1) in unique(enumerate(rand(snapshot_ids, 100)))
+	snapshot_1 = get_snapshot(data, snapshot_id_1)
         time_1 = get_time(snapshot_1)
         
-        for (j, snapshot_id_2) in unique(enumerate(rand(snapshot_ids, 200)))
+        for (j, snapshot_id_2) in unique(enumerate(rand(snapshot_ids, 100)))
             snapshot_2 = get_snapshot(data, snapshot_id_2)
             time_2 = get_time(snapshot_2)
             
-            current_adaption = get_adaption_of_snapshot(data, snapshot_id_1, snapshot_id_2, 0.01, 20, 500)
+            current_adaption = get_adaption_of_snapshot(data, snapshot_id_1, snapshot_id_2, 0.01, 10, 50)
             
             index = (i-1)*num_snapshots + j
-            
+
+	    
+	    Threads.atomic_add!(count, 1)
+            @info "2D-LA \t $time_1 \t $(count[])"
+
+
             adaptions[index] = current_adaption
             times_1[index] = time_1
             times_2[index] = time_2
         end
-        @info "2D-LA \t $time_1"
+        @info "2D-LA \t $time_1 \t $(count[])"
     end
 
     return (times_1, times_2, adaptions)
@@ -243,6 +250,8 @@ if length(ARGS) != 2
 else
     trial_id, type_of_analysis = ARGS
 end
+
+@info ARGS
 
 if type_of_analysis == "LA"
     name = "LevelOfAdaption"
