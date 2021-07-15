@@ -4,7 +4,7 @@ using Serialization
 using Dates
 import Random
 using Profile
-# using PProf
+using PProf
 
 create_model(logger) = GebModel(logger)
 function print_function(trial, step, model)

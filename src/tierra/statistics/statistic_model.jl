@@ -40,11 +40,11 @@ end
 
 get_daughters(TierraModel, tierrian_organism::TierrianOrganism) = tierrian_organism.daughters
 
-function get_abstracted_organism(model::TierraModel, model_organism::TierrianOrganism, parent_id)
-    return Organism{TierrianPosition, TierrianEnvironment}(
+function get_abstracted_organism(model::TierraModel, model_organism::TierrianOrganism, parent_ids, parent_genotypes)
+    return Organism{TierrianPosition, TierrianEnvironment, Vector{UInt8}}(
                     get_id(model, model_organism),
-                    get_genotype_id(model, model_organism),
-                    parent_id,
+                    get_genotype(model, model_organism),
+                    parent_ids, parent_genotypes,
                     get_position(model, model_organism),
                     get_environment(model, model_organism),
                     get_time_birth(model, model_organism),

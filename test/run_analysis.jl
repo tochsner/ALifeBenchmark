@@ -244,6 +244,31 @@ function cross_level_of_adaption(trial_id)
     return (times_1, times_2, adaptions)
 end
 
+function genotype_entropy(trial_id)
+    @info "ENTROPY:"
+
+    snapshot_ids = get_snapshot_ids(data, trial_id)
+    num_snapshots = length(snapshot_ids)
+
+    entropies = SharedArray{Float64}(num_snapshots)
+    times = SharedArray{UInt64}(num_snapshots)
+
+    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
+        current_snapshot = get_snapshot(data, snapshot_id)
+        current_time = get_time(current_snapshot)
+        
+        current_distribution = get_genotype_distribution(current_snapshot)
+        current_entropy = get_entropy(current_distribution)
+
+        @info "$current_time \t $current_entropy"
+
+        entropies[i] = current_entropy
+        times[i] = current_time
+    end
+
+    return (times, entropies)
+end
+
 if length(ARGS) != 2
     trial_id = "12433992799852588"
     type_of_analysis = "LA"
@@ -274,6 +299,9 @@ elseif type_of_analysis == "2DPD"
 elseif type_of_analysis == "2DLA"
     name = "2DLevelOfAdaption"
     func = cross_level_of_adaption
+elseif type_of_analysis == "EN"
+    name = "GenotypeEntropy"
+    func = genotype_entropy
 end
 
 result = func(trial_id)

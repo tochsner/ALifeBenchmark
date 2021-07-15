@@ -30,7 +30,7 @@ export TierrianOrganism
 
 export SMALL_ANCESTOR, LARGE_ANCESTOR
 
-export execute_slice!
+export execute_slice!, SLICE_SIZE
 
 export collect_distribution
 

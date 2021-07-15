@@ -45,7 +45,7 @@ function divide(model::TierraModel, organism::TierrianOrganism)
     daughter.parent_hash = organism.hash
     set_hash!(daughter, model)
 
-    log_birth(model.logger, model, daughter, organism)
+    log_birth(model.logger, model, daughter, [organism])
 
     organism.has_daughter = false
     push!(organism.daughters, organism)
