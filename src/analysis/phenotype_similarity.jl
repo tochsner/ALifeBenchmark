@@ -24,8 +24,8 @@ function get_phenotype_similarity(data::CollectedData, genotype_id_1::String, ge
     end
 
     similarity = estimate(rel_tolerance, min_samples, max_samples) do
-        snapshots = sam
-        samples = sample_organisms(data, NUM_THREADS)
+	    snapshots = [get_snapshot(data, sample_snapshot_id(data)) for _ in 1:10]        
+	    samples = [get_id(s, rand(get_organisms(s))) for s in snapshots]
         sample_similarities = zeros(10)
         
         @threads for t in 1:10
@@ -36,7 +36,7 @@ function get_phenotype_similarity(data::CollectedData, genotype_id_1::String, ge
 
         return sample_similarities
     end
-    
+
     data.phenotype_similarities[(genotype_id_1, genotype_id_2)] = PhenotypeSimilarity(similarity, rel_tolerance)
 
     return similarity

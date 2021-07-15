@@ -4,19 +4,15 @@ function collect_distribution(model_creator, step_function, print_function, num_
     for t in 1:num_trials
         trial_id = time_ns()
 
-        Random.seed!(0) # trial_id)
+        Random.seed!(trial_id)
 
         logger = RunLogger(trial_id)
         model = model_creator(logger)
-
-        time = 0
 
         for s in 1:convert(UInt64, floor(num_steps / slice_size))
             step_function(model)
             print_function(t, s, model)
         end
-
-        println(time)
 
         save_log(logger)
     end

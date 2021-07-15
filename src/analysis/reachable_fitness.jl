@@ -22,7 +22,7 @@ function get_reachable_fitness(data::CollectedData, snapshot_id::String, rel_tol
         while true
             logger = ReachableFitnessLogger(snapshot)
             simulate_snapshot!(should_terminate, snapshot, logger)
-            
+           
             if length(logger.children) == 0 continue end
 
             is_beneficial = []        

@@ -88,7 +88,7 @@ function reachable_fitness(trial_id)
         current_reachable_fitness = get_reachable_fitness(data, snapshot_id, 0.001, 50, 500)
         current_time = get_time(get_snapshot(data, snapshot_id))
 
-        @info "$current_time \t $current_reachable_fitness"
+        @info "RF $current_time \t $current_reachable_fitness"
 
         reachable_fitness[i] = current_reachable_fitness
         times[i] = current_time

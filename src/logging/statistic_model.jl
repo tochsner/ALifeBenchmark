@@ -3,7 +3,7 @@ struct SimulationExpection <: Exception
 end
 
 get_organism_ids(snapshot) = [get_id(snapshot, o) for o in get_organisms(snapshot)]
-get_id(snapshot, organisms::Vector) = [get_id(snapshot, o) for o in organisms]
+get_ids(snapshot, organisms::Vector) = [get_id(snapshot, o) for o in organisms]
 
 function get_fitness(snapshot, abstracted_organism_to_replace::Organism, new_genotype)    
     get_fitness(snapshot, abstracted_organism_to_replace.id, new_genotype)

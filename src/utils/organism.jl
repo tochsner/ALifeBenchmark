@@ -6,11 +6,12 @@ struct DefaultPosition <: Position end
 
 struct Ancestor end
 
-mutable struct Organism{P <: Position, E <: Environment}
+mutable struct Organism{P <: Position, E <: Environment, G}
     id::UInt64
     
-    genotype_id::String
-    parent_id::Union{UInt64, Vector{UInt64}}
+    genotype::G
+    parent_ids::Vector{UInt64}
+    parent_genotypes::Vector{G}
     
     position::P
     environment::E
@@ -20,15 +21,15 @@ mutable struct Organism{P <: Position, E <: Environment}
     
     snapshot_id::String
 
-    function Organism(genotype, parent, time_birth, time_death) where
-        {O <: Organism, A <: Ancestor}
+    function Organism(genotype, parent_ids, parent_genotypes, time_birth, time_death) where
+        {O <: Organism, A <: Ancestor, G}
 
-        new{DefaultPosition, DefaultEnvironment}(-1, genotype, parent, DefaultPosition(), DefaultEnvironment(), time_birth, time_death, 0)
+        new{DefaultPosition, DefaultEnvironment, G}(-1, genotype, parent_ids, parent_genotypes, DefaultPosition(), DefaultEnvironment(), time_birth, time_death, 0)
     end
-    function Organism{P, E}(id, genotype, parent, position::P, environment::E, time_birth, time_death, snapshot_id) where
-        {P <: Position, E <: Environment}
+    function Organism{P, E, G}(id, genotype, parent_ids, parent_genotypes, position::P, environment::E, time_birth, time_death, snapshot_id) where
+        {P <: Position, E <: Environment, G}
 
-        new{P, E}(id, genotype, parent, position, environment, time_birth, time_death, string(snapshot_id))
+        new{P, E, G}(id, genotype, parent_ids, parent_genotypes, position, environment, time_birth, time_death, string(snapshot_id))
     end
 end
 
