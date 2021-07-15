@@ -20,7 +20,8 @@ export is_reproducing
 
 export _wasserstein, get_genotype_distribution
 
-export save_offspring_log, build_genotype_graph, analyse_graph, calculate_phenotype_graph!, save_graph
+export save_offspring_log, build_genotype_graph, analyse_graph, calculate_phenotype_graph!
+export save_graph, load_graph, calculate_neutral_networks!
 
 # Tierra
 
