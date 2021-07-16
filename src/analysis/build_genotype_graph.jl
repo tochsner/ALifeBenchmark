@@ -37,6 +37,8 @@ function build_genotype_graph!(graph_data::GGraphData)
         end
     end
 
+    @info "Mapping created. Building graph..."
+
     genotype_graph = SimpleWeightedDiGraph(length(genotype_mapping))
 
     for ((parent, offspring), num) in parent_offsprings
@@ -44,6 +46,8 @@ function build_genotype_graph!(graph_data::GGraphData)
         offspring_index = genotype_mapping[offspring]        
         add_edge!(genotype_graph, parent_index, offspring_index, num)
     end
+
+    @info "Graph built."
 
     graph_data.genotype_vertex_mapping = genotype_mapping
     graph_data.genotype_graph = genotype_graph
