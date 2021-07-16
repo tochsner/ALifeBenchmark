@@ -4,15 +4,27 @@ using SimpleWeightedGraphs
 using MetaGraphs
 using Bijections
 
-mutable struct GPGraph
+mutable struct GGraphData
     genotype_vertex_mapping::Bijection
     genotype_graph::SimpleWeightedDiGraph
+    
     phenotype_graph::SimpleWeightedDiGraph
+
     neutral_networks::Vector
+    neutral_network_graph::SimpleWeightedDiGraph
+
+    fitness_values::Dict
+
+    GGraphData() = new(Bijection(), SimpleWeightedDiGraph(0), SimpleWeightedDiGraph(0), [], SimpleWeightedDiGraph(0), Dict())
 end
 
-function build_genotype_graph()    
-    parent_offsprings = deserialize(CALCULATED_FOLDER * "offspring_parents")
+function save_graph_data(graph::GGraphData)
+    serialize(CALCULATED_FOLDER * "GGraphData", graph)
+end
+load_graph_data() = deserialize(CALCULATED_FOLDER * "GGraphData")
+
+function build_genotype_graph!(graph_data::GGraphData)    
+    parent_offsprings = deserialize(CALCULATED_FOLDER * "parent_offspring_ocurrances")
 
     genotype_mapping = Bijection()
     genotype_graph = SimpleWeightedDiGraph(length(genotype_mapping))
@@ -34,81 +46,56 @@ function build_genotype_graph()
         add_edge!(genotype_graph, parent_index, offspring_index, num)
     end
 
-    return GPGraph(genotype_mapping, genotype_graph, SimpleWeightedDiGraph(0), [])
+    graph_data.genotype_vertex_mapping = genotype_mapping
+    graph_data.genotype_graph = genotype_graph
 end 
 
-function analyse_graph(graph)    
-    println("Density:             $(density(graph))")
-    
-    println("Avg. Out. Degree:    $(mean(indegree(graph)))")
-    println("Max. Out. Degree:    $(Δout(graph))")
-    println("Min. Out. Density:   $(δout(graph))")
-    println("Avg. Out. Degree:    $(mean(outdegree(graph)))")
-    println("Max. In. Degree:     $(Δin(graph))")
-    println("Min. In. Density:    $(δin(graph))")
-    
-    println("connectedness:       $(is_weakly_connected(graph))") 
-end
+function build_phenotype_graph!(graph_data::GGraphData, min_occurances, tolerance, min_samples, max_samples)
+    phenotype_graph = SimpleWeightedDiGraph(nv(graph_data.genotype_graph))
 
-function calculate_phenotype_graph!(data::CollectedData, graph::GPGraph, min_occurances, tolerance, min_samples, max_samples)
-    phenotype_graph = SimpleWeightedDiGraph(nv(graph.genotype_graph))
-
-    count = 0
-
-    for e in unique(edges(graph.genotype_graph))
-        u, v = src(e), dst(e)
+    for (i, edge) in unique(enumerate(edges(graph_data.genotype_graph)))
+        u, v = src(edge), dst(edge)
 
         if u == v continue end
-        if graph.genotype_graph.weights[u, v] < min_occurances continue end
+        if has_edge(graph.genotype_graph, u, v) == false continue end
+        if graph_data.genotype_graph.weights[u, v] < min_occurances continue end
 
-        genotype_u, genotype_v = graph.genotype_vertex_mapping(u), graph.genotype_vertex_mapping(v)
+        genotype_u, genotype_v = graph_data.genotype_vertex_mapping(u), graph_data.genotype_vertex_mapping(v)
 
         if has_edge(phenotype_graph, v, u) 
             similarity = phenotype_graph.weights[v, u]
         else
-            similarity = get_phenotype_similarity(data, genotype_u, genotype_v, tolerance, min_samples, max_samples)
-            if similarity < 1e-15
-                println(genotype_u, " ", genotype_v, " ", similarity)
-            end
-            similarity = max(1e-15, similarity) # an edge weight of 0 would be ignored by SimpleWeightedDiGraph
+            similarity = get_phenotype_similarity(genotype_u, genotype_v, tolerance, min_samples, max_samples)
+            similarity = max(eps(), similarity) # an edge weight of 0 would be ignored by SimpleWeightedDiGraph
         end
 
         add_edge!(phenotype_graph, u, v, similarity)
-
-        count += 1
-        @info "$(count / ne(graph.genotype_graph)) \t $similarity"
+        
+        @info "$(i / ne(graph.genotype_graph)) \t $similarity"
     end
 
     graph.phenotype_graph = phenotype_graph
 end
 
-function save_graph(graph::GPGraph)
-    serialize("GP", graph)
-end
-
-load_graph() = deserialize("GP")
-
-function calculate_neutral_networks!(graph::GPGraph, epsilon)
+function build_neutral_networks!(graph_data::GGraphData, epsilon)
     neutral_networks = []
     already_assigned_nodes = []
 
-    for edge in shuffle(unique(edges(graph.phenotype_graph)))
-	    if has_edge(graph.phenotype_graph, edge) == false continue end
+    for edge in shuffle(unique(edges(graph_data.phenotype_graph)))
+	    if has_edge(graph_data.phenotype_graph, edge) == false continue end
         
 	    node = src(edge)
         if node in already_assigned_nodes continue end
 
-	    neutral_network = find_neutral_network(graph.phenotype_graph, node, epsilon)
+	    neutral_network = _find_neutral_network(graph_data.phenotype_graph, node, epsilon)
         push!(neutral_networks, neutral_network)
         append!(already_assigned_nodes, neutral_network)
     end
 
-    graph.neutral_networks = neutral_networks
-
-    return neutral_networks
+    graph_data.neutral_networks = neutral_networks
 end
 
-function find_neutral_network(graph::SimpleWeightedDiGraph, starting_vertex, epsilon)
+function _find_neutral_network(graph::SimpleWeightedDiGraph, starting_vertex, epsilon)
     neutral_network = [starting_vertex]
 
     to_test = [(starting_vertex, n) for n in outneighbors(graph, starting_vertex)]

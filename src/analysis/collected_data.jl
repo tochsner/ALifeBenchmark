@@ -1,59 +1,20 @@
 using Serialization
 
-struct PhenotypeSimilarity
-    similarity::Float64
-    precision::Float64
-end
-
-struct CollectedData
-    trial_ids::Vector{String}
-
-    snapshots::Dict{String, Any}
-    phenotype_similarities::Dict{Tuple{String, String}, PhenotypeSimilarity}
-    
-    lock::ReentrantLock
-
-    CollectedData() = new([], [], Dict(), Dict(), ReentrantLock())
-end
-
-function load_collected_data()
-    data = CollectedData()
-
-    for trial_id in get_trials()
-        push!(data.trial_ids, trial_id)
-    end
-
-    if isfile(CALCULATED_FOLDER * "phenotype_similarites")
-        merge!(data.phenotype_similarities, deserialize(CALCULATED_FOLDER * "phenotype_similarites"))
-    end
-
-    return data
-end
-
 function get_trials()
     unique([String(split(t, "_")[1]) for t in readdir(LOGGER_FOLDER) if isfile(LOGGER_FOLDER * t)])
 end
 
-function get_snapshot(data::CollectedData, snapshot_id)
-    lock(data.lock) do
-        if haskey(data.snapshots, snapshot_id)
-            return deepcopy(data.snapshots[snapshot_id])
-        end
+function get_snapshot(snapshot_id)
+    for filename in readdir(SNAPSHOTS_FOLDER)
+        _, file_snapshot_id = split(filename, "_")
+        if file_snapshot_id != snapshot_id continue end
 
-        for filename in readdir(SNAPSHOTS_FOLDER)
-            _, file_snapshot_id = split(filename, "_")
-
-            if file_snapshot_id != snapshot_id continue end
-
-            snapshot = deserialize(SNAPSHOTS_FOLDER * filename)
-            data.snapshots[snapshot_id] = snapshot
-
-            return deepcopy(snapshot)
-        end
+        snapshot = deserialize(SNAPSHOTS_FOLDER * filename)
+        return deepcopy(snapshot)
     end
 end
 
-function get_snapshot_ids(data::CollectedData)
+function get_snapshot_ids()
     snapshot_ids = []
 
     for filename in readdir(SNAPSHOTS_FOLDER)
@@ -61,10 +22,10 @@ function get_snapshot_ids(data::CollectedData)
         push!(snapshot_ids, string(snapshot_id))
     end
 
-    return snapshot_ids
+    return unique(snapshot_ids)
 end
 
-function get_snapshot_ids(_::CollectedData, trial_id::String)
+function get_snapshot_ids(trial_id::String)
     snapshot_ids = []
 
     for filename in readdir(SNAPSHOTS_FOLDER)
@@ -78,19 +39,15 @@ function get_snapshot_ids(_::CollectedData, trial_id::String)
     return snapshot_ids
 end
 
-function save_calculated(data::CollectedData)
-    serialize(CALCULATED_FOLDER * "phenotype_similarites", data.phenotype_similarities)
-end
-
-function save_offspring_log(data::CollectedData)
+function save_offspring_log()
     offspring_parents = Dict()
 
-    for trial_id in data.trial_ids
+    for trial_id in get_trials()
         @info trial_id
-        i = 0 
+        i = 0
         
         for file in readdir(LOGGER_FOLDER)
-            current_trial_id = split(file, "_")[1]
+            current_trial_id, _ = split(file, "_")
             if current_trial_id != trial_id continue end
     
             logged_organisms = deserialize(LOGGER_FOLDER * file)
@@ -112,6 +69,6 @@ function save_offspring_log(data::CollectedData)
             @info "$i \t $file"
         end
 
-        serialize(CALCULATED_FOLDER * "offspring_parents", offspring_parents)
+        serialize(CALCULATED_FOLDER * "parent_offspring_ocurrances", offspring_parents)
     end
 end

@@ -11,7 +11,7 @@ function collect_distribution(model_creator, step_function, print_function, num_
 
         for s in 1:convert(UInt64, floor(num_steps / slice_size))
             step_function(model)
-            print_function(t, s, model)
+            print_function(t, s*slice_size, model)
         end
 
         save_log(logger)

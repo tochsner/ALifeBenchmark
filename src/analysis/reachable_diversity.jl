@@ -2,17 +2,15 @@ using Statistics: mean
 
 struct ReachableDiversityLogger <: Logger
     original_organisms_alive::Vector{UInt64}
-    child_genotypes::Vector{Tuple}
+    child_genotypes::Vector
 
     function ReachableDiversityLogger(snapshot)
         new(get_organism_ids(snapshot), [])
     end
 end
 
-function get_reachable_diversity(data::CollectedData, snapshot_id::String, rel_tolerance, min_samples, max_samples)
-    snapshot = get_snapshot(data, snapshot_id)
-
-    reachable_diversity = estimate(rel_tolerance, min_samples, max_samples, print_progress = true) do
+function get_reachable_diversity(snapshot, rel_tolerance, min_samples, max_samples)
+    reachable_diversity = estimate(rel_tolerance, min_samples, max_samples) do
         logger = ReachableDiversityLogger(snapshot)
         simulate_snapshot!(should_terminate, snapshot, logger)
         
@@ -22,16 +20,16 @@ function get_reachable_diversity(data::CollectedData, snapshot_id::String, rel_t
         end
         
         phenotype_similarities = []
-        num_samples_per_run = 2
+        num_samples_per_run = 5
         
         for _ in 1:num_samples_per_run
-            (_, genotype_1) = rand(logger.child_genotypes)
-            (_, genotype_2) = rand(logger.child_genotypes)
+            genotype_1 = rand(logger.child_genotypes)
+            genotype_2 = rand(logger.child_genotypes)
             
-            snapshot_to_test = get_snapshot(data, sample_snapshot_id(data))
-            sample_to_test = get_id(snapshot_to_test, rand(get_organisms(snapshot_to_test)))
+            snapshot_to_test = sample_snapshot_id() |> get_snapshot
+            sample_id_to_replace = get_id(snapshot_to_test, get_organisms(snapshot_to_test) |> rand)
             
-            phenotype_similarity = (get_fitness(snapshot_to_test, sample_to_test, genotype_1) - get_fitness(snapshot_to_test, sample_to_test, genotype_2))^2            
+            phenotype_similarity = (get_fitness(snapshot_to_test, sample_id_to_replace, genotype_1) - get_fitness(snapshot_to_test, sample_id_to_replace, genotype_2))^2            
             
             push!(phenotype_similarities, phenotype_similarity)
         end
@@ -47,13 +45,15 @@ should_terminate(logger::ReachableDiversityLogger, snapshot) = length(logger.ori
 function log_step(::ReachableDiversityLogger, model) end
 function save_log(::ReachableDiversityLogger) end
 
-function log_birth(logger::ReachableDiversityLogger, model, child, parent=nothing)
-    child_genotype_id = get_genotype_id(model, child)
-    parent_genotype_id = get_genotype_id(model, parent)
+function log_birth(logger::ReachableDiversityLogger, model, child, parents=nothing)
+    if parents === nothing return end
 
-    if child_genotype_id != parent_genotype_id
-        push!(logger.child_genotypes, (get_genotype_id(model, child), get_genotype(model, child)))
-    end
+    child_genotype = get_genotype(model, child)
+    parent_genotype = get_genotype(model, rand(parents))
+
+    if child_genotype == parent_genotype return end
+
+    push!(logger.child_genotypes, child_genotype)
 end
 
 function log_death(logger::ReachableDiversityLogger, model, organism)

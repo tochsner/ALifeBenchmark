@@ -17,11 +17,13 @@ export get_phenotype_similarity, get_most_frequent_genotypes, get_reachable_dive
 export get_reachable_fitness, get_snapshot, get_T_similarity, get_evolutionary_potential
 export get_adaption_of_genotype, get_adaption_of_snapshot
 export is_reproducing
+export get_entropy
 
 export _wasserstein, get_genotype_distribution
 
 export save_offspring_log, build_genotype_graph, analyse_graph, calculate_phenotype_graph!
-export save_graph, load_graph, calculate_neutral_networks!
+export GGraphData, save_graph_data, load_graph_data
+export build_genotype_graph!, build_phenotype_graph!, build_neutral_networks!
 
 # Tierra
 
@@ -69,10 +71,10 @@ include("logging/run_logger.jl")
 
 include("analysis/collected_data.jl")
 include("analysis/sample_distributions.jl")
-include("analysis/genotype_occurances.jl")
 
 include("analysis/estimator.jl")
 
+include("analysis/utils.jl")
 include("analysis/phenotype_similarity.jl")
 include("analysis/reachable_diversity.jl")
 include("analysis/reachable_fitness.jl")
@@ -80,6 +82,7 @@ include("analysis/T_similarity.jl")
 include("analysis/evolutionary_potential.jl")
 include("analysis/level_of_adaption.jl")
 include("analysis/reproducability.jl")
+include("analysis/entropy.jl")
 
 include("analysis/build_genotype_graph.jl")
 

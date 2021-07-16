@@ -1,15 +1,15 @@
 function estimate(get_sample, rel_tolerance, min_samples, max_samples; print_progress = false)
-    estimate(get_sample, get_new_estimation, get_estimation_variance, rel_tolerance, min_samples, max_samples, print_progress = print_progress)
+    estimate(get_sample, _get_new_estimation, _get_estimation_variance, rel_tolerance, min_samples, max_samples, print_progress = print_progress)
 end
 
-function get_new_estimation(sample::Number, previous_samples, previous_estimation)
+function _get_new_estimation(sample::Number, previous_samples, previous_estimation)
     if length(previous_samples) == 0
         sample
     else
         (sum(previous_samples) + sample) / (length(previous_samples) + 1)
     end
 end
-function get_new_estimation(sample::Vector, previous_samples, previous_estimation)
+function _get_new_estimation(sample::Vector, previous_samples, previous_estimation)
     if length(previous_samples) == 0
         mean(sample)
     else
@@ -17,7 +17,7 @@ function get_new_estimation(sample::Vector, previous_samples, previous_estimatio
     end
 end
 
-function get_estimation_variance(sample, previous_samples, estimate)
+function _get_estimation_variance(sample, previous_samples, estimate)
     if length(previous_samples) + length(sample) <= 1 return Inf end
 
     all_samples = [previous_samples ; sample]

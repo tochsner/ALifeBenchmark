@@ -10,10 +10,8 @@ struct EvolutionaryPotentialLogger <: Logger
     end
 end
 
-function get_evolutionary_potential(data::CollectedData, snapshot_id::String, T::Integer, rel_tolerance, min_samples, max_samples)
-    snapshot = get_snapshot(data, snapshot_id)
-
-    T_similarity = estimate(rel_tolerance, min_samples, max_samples, print_progress = true) do
+function get_evolutionary_potential(snapshot, T::Integer, rel_tolerance, min_samples, max_samples)
+    T_similarity = estimate(rel_tolerance, min_samples, max_samples) do
         logger = EvolutionaryPotentialLogger(snapshot)
         simulate_snapshot!(should_terminate, snapshot, logger)
         
@@ -47,18 +45,22 @@ should_terminate(logger::EvolutionaryPotentialLogger, snapshot) = length(logger.
 function log_step(::EvolutionaryPotentialLogger, model) end
 function save_log(::EvolutionaryPotentialLogger) end
 
-function log_birth(logger::EvolutionaryPotentialLogger, model, child, parent=nothing)
+function log_birth(logger::EvolutionaryPotentialLogger, model, child, parents=nothing)
+    if parents === nothing return end
+
+    parent = rand(parents)
+
     child_id = get_id(model, child)
     parent_id = get_id(model, parent)
 
-    child_genotype_id = get_genotype_id(model, child)
-    parent_genotype_id = get_genotype_id(model, parent)
+    child_genotype = get_genotype(model, child)
+    parent_genotype = get_genotype(model, parent)
 
-    if child_genotype_id == parent_genotype_id return end
+    if child_genotype == parent_genotype return end
 
     if parent_id in logger.original_organisms_alive
         push!(logger.children, child_id)
-        logger.parent_genotype[child_id] = get_genotype(model, parent)
+        logger.parent_genotype[child_id] = parent_genotype
         logger.snapshots[child_id] = deepcopy(model)
     end
 end

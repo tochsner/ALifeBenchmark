@@ -1,15 +1,11 @@
 using ALifeBenchmark
 import SharedArrays.SharedArray
 using Plots
+using Random
 using Serialization
 import Base.Threads.@threads
 using StringDistances: Levenshtein
 using Measures
-
-using Serialization
-
-data = load_collected_data(load_logged_organisms = false)
-
 
 function plot_result(times, values, name, trial_id)
     plot(times, values, 
@@ -25,6 +21,7 @@ function plot_result(times, values, name, trial_id)
             dpi = 1000)
     savefig("$name$trial_id")
 end
+
 function plot_result(times_1, times_2, values, name, trial_id)
     plot(times_1, times_2, 
             marker_z  = values,
@@ -45,267 +42,165 @@ function save_result(data, name, trial_id)
     serialize("$name$trial_id", data)
 end
 
-"""
-STATISTICS
-"""
-
-function level_of_adaption(trial_id)
-    @info "LEVEL OF ADAPTION"
-
-    snapshot_ids = get_snapshot_ids(data, trial_id)
-    num_snapshots = length(snapshot_ids)
-
-    last_snaphot_id = snapshot_ids[end]
-
-    adaptions = SharedArray{Float64}(num_snapshots)
-    times = SharedArray{UInt64}(num_snapshots)
-
-    count = Threads.Atomic{Int}(0)
-    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
-        adaption = get_adaption_of_snapshot(data, last_snaphot_id, snapshot_id, 0.001, 50, 500)
-        time = get_time(get_snapshot(data, snapshot_id))
-
-        Threads.atomic_add!(count, 1)
-        @info "$count[] \t $time \t $adaption"
-
-        adaptions[i] = adaption
-        times[i] = time
-    end
-
-    return (times, adaptions)
+function collect_basic_statistic(abbrevation, trial_id, get_statistic)
+    collect_compare_to_end_statistic(abbrevation, trial_id, (x, _) -> get_statistic(x), identity)
 end
 
-function reachable_fitness(trial_id)
-    @info "REACHABLE FITNESS"
+function collect_compare_to_end_statistic(abbrevation, trial_id, get_statistic, prepare)
+    @info "Start $abbrevation"
 
-    snapshot_ids = get_snapshot_ids(data, trial_id)
+    snapshot_ids = get_snapshot_ids(trial_id)
     num_snapshots = length(snapshot_ids)
 
-    reachable_fitness = SharedArray{Float64}(num_snapshots)
+    prepared_last = last(snapshot_ids) |> get_snapshot |> prepare
+
+    values = SharedArray{Float64}(num_snapshots)
     times = SharedArray{UInt64}(num_snapshots)
 
-    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
-        current_reachable_fitness = get_reachable_fitness(data, snapshot_id, 0.001, 50, 500)
-        current_time = get_time(get_snapshot(data, snapshot_id))
+    done = Threads.Atomic{Int}(0)
 
-        @info "RF $current_time \t $current_reachable_fitness"
+    @threads for (i, snapshot_id) in (shuffle(snapshot_ids) |> enumerate |> unique)
+        snapshot = get_snapshot(snapshot_id)
+        prepared = prepare(snapshot)
 
-        reachable_fitness[i] = current_reachable_fitness
-        times[i] = current_time
-    end
-
-    return (times, reachable_fitness)
-end
-
-function population_divergence(trial_id)
-    @info "POPULATION DIVERGENCE:"
-
-    snapshot_ids = get_snapshot_ids(data, trial_id)
-    num_snapshots = length(snapshot_ids)
-
-    last_snaphot_id = snapshot_ids[end]
-    last_snapshot = get_snapshot(data, last_snaphot_id)
-    last_distribution = get_genotype_distribution(last_snapshot)
-
-    divergences = SharedArray{Float64}(num_snapshots)
-    times = SharedArray{UInt64}(num_snapshots)
-
-    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
-        current_snapshot = get_snapshot(data, snapshot_id)
-        current_time = get_time(current_snapshot)
+        current_value = get_statistic(prepared, prepared_last)
+        current_time = get_time(snapshot)
         
-        current_distribution = get_genotype_distribution(current_snapshot)
-        current_distance = _wasserstein(last_distribution, current_distribution, Levenshtein())
-
-        @info "$current_time \t $current_distance"
-
-        divergences[i] = current_distance
+        values[i] = current_value
         times[i] = current_time
+
+        Threads.atomic_add!(done, 1)
+        @info "$abbrevation \t $(done[] / num_snapshots) \t $current_time \t $current_value"
+
+        if done[] % 100 == 0
+            plot_result(times, values, abbrevation, trial_id)
+            save_result((times, values), abbrevation, trial_id)
+        end
     end
 
-    return (times, divergences)
+    return (times, values)
 end
 
-function reachable_diversity(trial_id)
-    @info "REACHABLE DIVERSITY:"
+function collect_cross_statistic(abbrevation, trial_id, get_statistic, prepare)
+    @info "Start $abbrevation"
 
-    snapshot_ids = get_snapshot_ids(data, trial_id)
+    snapshot_ids = get_snapshot_ids(trial_id)
     num_snapshots = length(snapshot_ids)
 
-    reachable_diversities = SharedArray{Float64}(num_snapshots)
-    times = SharedArray{UInt64}(num_snapshots)
+    values = SharedArray{Float64}(num_snapshots)
+    times_1 = SharedArray{UInt64}(num_snapshots)
+    times_2 = SharedArray{UInt64}(num_snapshots)
 
-    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
-        current_time = get_time(get_snapshot(data, snapshot_id))
-        current_diversity = get_reachable_diversity(data, snapshot_id, 0.001, 100, 500)
+    done = Threads.Atomic{Int}(0)
 
-        @info "$current_time \t $current_diversity"
-
-        reachable_diversities[i] = current_diversity
-        times[i] = current_time
-    end
-
-    return (times, reachable_diversities)
-end
-
-function evolutionary_potential(trial_id)
-    @info "EVOLUTIONARY POTENTIAL:"
-
-    snapshot_ids = get_snapshot_ids(data, trial_id)
-    num_snapshots = length(snapshot_ids)
-
-    evolutionary_potentials = SharedArray{Float64}(num_snapshots)
-    times = SharedArray{UInt64}(num_snapshots)
-
-    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
-        current_time = get_time(get_snapshot(data, snapshot_id))
-        current_potential = get_evolutionary_potential(data, snapshot_id, 600_000, 0.001, 50, 500)
-
-        @info "$current_time \t $current_potential"
-
-        evolutionary_potentials[i] = current_potential
-        times[i] = current_time
-    end
-
-    return (times, evolutionary_potentials)
-end
-
-function cross_population_divergence(trial_id)
-    @info "2D-POPULATION DIVERGENCE:"
-
-    snapshot_ids = get_snapshot_ids(data, trial_id)
-    num_snapshots = length(snapshot_ids)
-
-    divergences = SharedArray{Float64}(num_snapshots^2)
-    times_1 = SharedArray{UInt64}(num_snapshots^2)
-    times_2 = SharedArray{UInt64}(num_snapshots^2)
-
-    @threads for (i, snapshot_id_1) in unique(enumerate(snapshot_ids))
-        snapshot_1 = get_snapshot(data, snapshot_id_1)
+    @threads for (i, snapshot_id_1) in (shuffle(snapshot_ids) |> enumerate |> unique)
+        snapshot_1 = get_snapshot(snapshot_id_1)
+        prepared_1 = prepare(snapshot_1)
         time_1 = get_time(snapshot_1)
-        distribution_1 = get_genotype_distribution(snapshot_1)
-        
-        for (j, snapshot_id_2) in unique(enumerate(snapshot_ids))
-            snapshot_2 = get_snapshot(data, snapshot_id_2)
-            time_2 = get_time(snapshot_2)
-            distribution_2 = get_genotype_distribution(snapshot_2)
-            
-            current_distance = _wasserstein(distribution_1, distribution_2, Levenshtein())
 
-            
+        for (j, snapshot_id_2) in (shuffle(snapshot_ids) |> enumerate |> unique)
+            snapshot_2 = get_snapshot(snapshot_id_2)
+            prepared_2 = prepare(snapshot_2)
+            time_2 = get_time(snapshot_2)
+
+            current_value = get_statistic(prepared_1, prepared_2)
+
             index = (i-1)*num_snapshots + j
             
-            divergences[index] = current_distance
+            values[index] = current_value
             times_1[index] = time_1
             times_2[index] = time_2
+
+            Threads.atomic_add!(done, 1)
+            @info "$abbrevation \t $(done[] / num_snapshots / num_snapshots) \t $time_1 \t $time_2 \t $current_value"
+
+            if done[] % 1000 == 0
+                plot_result(times_1, times_2, values, abbrevation, trial_id)
+                save_result((times_1, times_2, values), abbrevation, trial_id)
+            end
         end
-        @info "2D-PD \t $time_1"
     end
 
-    return (times_1, times_2, divergences)
+    return (times_1, times_2, values)
 end
 
-function cross_level_of_adaption(trial_id)
-    @info "2D-Level of Adaption:"
+"""
+COLLECT STATISTIC
+"""
 
-    snapshot_ids = get_snapshot_ids(data, trial_id)
-    num_snapshots = length(snapshot_ids)
-
-    adaptions = SharedArray{Float64}(num_snapshots^2)
-    times_1 = SharedArray{UInt64}(num_snapshots^2)
-    times_2 = SharedArray{UInt64}(num_snapshots^2)
-    
-    count = Threads.Atomic{Int}(0)
-
-    @threads for (i, snapshot_id_1) in unique(enumerate(rand(snapshot_ids, 100)))
-	snapshot_1 = get_snapshot(data, snapshot_id_1)
-        time_1 = get_time(snapshot_1)
-        
-        for (j, snapshot_id_2) in unique(enumerate(rand(snapshot_ids, 100)))
-            snapshot_2 = get_snapshot(data, snapshot_id_2)
-            time_2 = get_time(snapshot_2)
-            
-            current_adaption = get_adaption_of_snapshot(data, snapshot_id_1, snapshot_id_2, 0.01, 10, 50)
-            
-            index = (i-1)*num_snapshots + j
-
-	    
-	    Threads.atomic_add!(count, 1)
-            @info "2D-LA \t $time_1 \t $(count[])"
-
-
-            adaptions[index] = current_adaption
-            times_1[index] = time_1
-            times_2[index] = time_2
-        end
-        @info "2D-LA \t $time_1 \t $(count[])"
-    end
-
-    return (times_1, times_2, adaptions)
-end
-
-function genotype_entropy(trial_id)
-    @info "ENTROPY:"
-
-    snapshot_ids = get_snapshot_ids(data, trial_id)
-    num_snapshots = length(snapshot_ids)
-
-    entropies = SharedArray{Float64}(num_snapshots)
-    times = SharedArray{UInt64}(num_snapshots)
-
-    @threads for (i, snapshot_id) in unique(enumerate(snapshot_ids))
-        current_snapshot = get_snapshot(data, snapshot_id)
-        current_time = get_time(current_snapshot)
-        
-        current_distribution = get_genotype_distribution(current_snapshot)
-        current_entropy = get_entropy(current_distribution)
-
-        @info "$current_time \t $current_entropy"
-
-        entropies[i] = current_entropy
-        times[i] = current_time
-    end
-
-    return (times, entropies)
-end
-
-if length(ARGS) != 2
+if length(ARGS) == 2
+    trial_id, type_of_analysis = ARGS
+    threshold = 0.001
+    min_samples, max_samples = 50, 500
+elseif length(ARGS) == 5
+    trial_id, type_of_analysis, threshold, min_samples, max_samples = ARGS
+    threshold = parse(Float64, threshold)
+    min_samples = parse(Int, min_samples)
+    max_samples = parse(Int, max_samples)
+else
     trial_id = "12433992799852588"
     type_of_analysis = "LA"
-else
-    trial_id, type_of_analysis = ARGS
+    threshold = 0.001
+    min_samples, max_samples = 50, 500
 end
 
 @info ARGS
 
 if type_of_analysis == "LA"
-    name = "LevelOfAdaption"
-    func = level_of_adaption
+
+    result = collect_compare_to_end_statistic(
+        type_of_analysis, 
+        trial_id, 
+        (snapshot, last_snapshot) -> get_adaption_of_snapshot(last_snapshot, snapshot, threshold, min_samples, max_samples), 
+        identity
+    )
+
 elseif type_of_analysis == "RF"
-    name = "ReachableFitness"
-    func = reachable_fitness
+
+    result = collect_basic_statistic(type_of_analysis, trial_id, snapshot -> get_reachable_fitness(snapshot, threshold, min_samples, max_samples))
+
 elseif type_of_analysis == "RD"
-    name = "ReachableDiversity"
-    func = reachable_diversity
+
+    result = collect_basic_statistic(type_of_analysis, trial_id, snapshot -> get_reachable_diversity(snapshot, threshold, min_samples, max_samples))
+
 elseif type_of_analysis == "PD"
-    name = "PopulationDivergence"
-    func = population_divergence
+
+    result = collect_compare_to_end_statistic(
+        type_of_analysis, 
+        trial_id,  
+        (distribution, last_distribution) -> _wasserstein(last_distribution, distribution, Levenshtein()),
+        get_genotype_distribution
+    )
+
 elseif type_of_analysis == "EP"
-    name = "EvolutionaryPotential"
-    func = evolutionary_potential
-elseif type_of_analysis == "2DPD"
-    name = "2DPopulationDivergence"
-    func = cross_population_divergence
-elseif type_of_analysis == "2DLA"
-    name = "2DLevelOfAdaption"
-    func = cross_level_of_adaption
-elseif type_of_analysis == "EN"
-    name = "GenotypeEntropy"
-    func = genotype_entropy
+
+    result = collect_basic_statistic(type_of_analysis, trial_id, snapshot -> get_evolutionary_potential(snapshot, 600_000, threshold, min_samples, max_samples))
+
+elseif type_of_analysis == "CPD"
+
+    result = collect_cross_statistic(
+        type_of_analysis, 
+        trial_id,  
+        (distribution_1, distribution_2) -> _wasserstein(distribution_1, distribution_2, Levenshtein()),
+        get_genotype_distribution
+    )
+
+elseif type_of_analysis == "CLA"
+
+    result = collect_cross_statistic(
+        type_of_analysis, 
+        trial_id, 
+        (snapshot_1, snapshot_2) -> get_adaption_of_snapshot(snapshot_1, snapshot_2, threshold, min_samples, max_samples), 
+        identity
+    )
+
+elseif type_of_analysis == "ENT"
+
+    result = collect_basic_statistic(type_of_analysis, trial_id, get_entropy)
+
 end
 
-result = func(trial_id)
-plot_result(result..., name, trial_id)
-save_result(result, name, trial_id)
+plot_result(result..., type_of_analysis, trial_id)
+save_result(result, type_of_analysis, trial_id)
 
 save_calculated(data)

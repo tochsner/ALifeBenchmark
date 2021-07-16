@@ -13,9 +13,7 @@ struct ReachableFitnessLogger <: Logger
     end
 end
 
-function get_reachable_fitness(data::CollectedData, snapshot_id::String, rel_tolerance, min_samples, max_samples)
-    snapshot = get_snapshot(data, snapshot_id)
-
+function get_reachable_fitness(snapshot, rel_tolerance, min_samples, max_samples)
     reachable_fitness = estimate(rel_tolerance, min_samples, max_samples) do
         is_beneficial = []
         
@@ -37,14 +35,11 @@ function get_reachable_fitness(data::CollectedData, snapshot_id::String, rel_tol
             end
 
             if length(is_beneficial) == 0 continue end
+
             break
         end
-
-        if 5 < length(is_beneficial)
-            return rand(is_beneficial, 5)
-        else
-            return is_beneficial
-        end
+        
+        return rand(is_beneficial, 5)
     end
 
     return reachable_fitness
@@ -59,9 +54,13 @@ end
 function log_step(::ReachableFitnessLogger, model) end
 function save_log(::ReachableFitnessLogger) end
 
-function log_birth(logger::ReachableFitnessLogger, model, child, parent=nothing)
-    child_genotype = get_genotype_id(model, child)
-    parent_genotype = get_genotype_id(model, parent)
+function log_birth(logger::ReachableFitnessLogger, model, child, parents=nothing)
+    if parents === nothing return end
+
+    parent = rand(parents)
+
+    child_genotype = get_genotype(model, child)
+    parent_genotype = get_genotype(model, parent)
 
     if child_genotype == parent_genotype return end
 
