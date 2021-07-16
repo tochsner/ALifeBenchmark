@@ -1,8 +1,8 @@
 using ALifeBenchmark
 
-@info "Collect parent-offspring relations"
+# @info "Collect parent-offspring relations"
 
-save_offspring_log()
+# save_offspring_log()
 
 graph_data = GGraphData()
 

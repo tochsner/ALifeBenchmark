@@ -30,10 +30,6 @@ function build_genotype_graph!(graph_data::GGraphData)
     genotype_graph = SimpleWeightedDiGraph(length(genotype_mapping))
 
     for ((parent, offspring), num) in parent_offsprings
-        if parent == offspring continue end
-        if isfile(GENOTYPE_FOLDER * parent) == false continue end
-        if isfile(GENOTYPE_FOLDER * offspring) == false continue end
-
         if haskey(genotype_mapping, parent) == false
             genotype_mapping[parent] = length(genotype_mapping) + 1
         end
@@ -80,19 +76,46 @@ end
 function build_neutral_networks!(graph_data::GGraphData, epsilon)
     neutral_networks = []
     already_assigned_nodes = []
+    memberships = Dict()
 
-    for edge in shuffle(unique(edges(graph_data.phenotype_graph)))
+    for edge in edges(graph_data.phenotype_graph)
 	    if has_edge(graph_data.phenotype_graph, edge) == false continue end
         
-	    node = src(edge)
+	    node = src(edge)    # we ignore sinks
         if node in already_assigned_nodes continue end
 
 	    neutral_network = _find_neutral_network(graph_data.phenotype_graph, node, epsilon)
         push!(neutral_networks, neutral_network)
-        append!(already_assigned_nodes, neutral_network)
+
+        for node in neutral_network
+            push!(already_assigned_nodes, node)
+            memberships[node] = length(neutral_networks)
+        end
+    end
+
+    neutral_network_graph = SimpleWeightedDiGraph(length(neutral_networks))
+
+    for edge in edges(graph_data.genotype_graph)
+        u, v = src(edge), dst(edge)
+        
+	    if has_edge(graph_data.genotype_graph, u, v) == false continue end
+	    if haskey(memberships, u) == false continue end
+	    if haskey(memberships, v) == false continue end
+
+        nn_index_u = memberships[u]
+        nn_index_v = memberships[v]
+
+        if has_edge(neutral_network_graph, nn_index_u, nn_index_v)
+            num = neutral_network_graph.weights[nn_index_u, nn_index_v] + graph_data.genotype_graph.weights[u, v]
+        else
+            num = graph_data.genotype_graph.weights[u, v]
+        end
+        
+        add_edge!(neutral_network_graph, nn_index_u, nn_index_v, num)
     end
 
     graph_data.neutral_networks = neutral_networks
+    graph_data.neutral_network_graph = neutral_network_graph
 end
 
 function _find_neutral_network(graph::SimpleWeightedDiGraph, starting_vertex, epsilon)
