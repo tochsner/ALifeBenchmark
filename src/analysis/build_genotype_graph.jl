@@ -62,25 +62,50 @@ end
 function build_phenotype_graph!(graph_data::GGraphData, min_occurances, tolerance, min_samples, max_samples)
     phenotype_graph = SimpleWeightedDiGraph(nv(graph_data.genotype_graph))
 
-    for (i, edge) in unique(enumerate(edges(graph_data.genotype_graph)))
+    @info "Collect relevant edges."
+
+    edges_to_test = []
+
+    for edge in edges(graph_data.genotype_graph)
         u, v = src(edge), dst(edge)
 
         if u == v continue end
+        if (v, u) in edges_to_test continue end
         if has_edge(graph.genotype_graph, u, v) == false continue end
         if graph_data.genotype_graph.weights[u, v] < min_occurances continue end
 
-        genotype_u, genotype_v = graph_data.genotype_vertex_mapping(u), graph_data.genotype_vertex_mapping(v)
+        push!(edges_to_test, (u, v))
+    end
 
-        if has_edge(phenotype_graph, v, u) 
-            similarity = phenotype_graph.weights[v, u]
-        else
-            similarity = get_phenotype_similarity(genotype_u, genotype_v, tolerance, min_samples, max_samples)
-            similarity = max(eps(), similarity) # an edge weight of 0 would be ignored by SimpleWeightedDiGraph
+    @info "Calculate Phenotype Similarities for $(length(edges_to_test)) edges."
+
+    phenotype_similarities = Dict()
+
+    done = Threads.Atomic{Int}(0)
+    re_lock = ReentrantLock()
+
+    @threads for (u, v) in edges_to_test
+        genotype_u, genotype_v = graph_data.genotype_vertex_mapping(u), graph_data.genotype_vertex_mapping(v)
+        similarity = get_phenotype_similarity(genotype_u, genotype_v, tolerance, min_samples, max_samples)
+
+        lock(re_lock) do
+            phenotype_similarities[(u, v)] = similarity
+            phenotype_similarities[(v, u)] = similarity
         end
 
-        add_edge!(phenotype_graph, u, v, similarity)
-        
-        @info "$(i / ne(graph.genotype_graph)) \t $similarity"
+        Threads.atomic_add!(done, 1)
+        @info (done[] / length(edges_to_test))
+    end
+
+    @info "Build Phenotype Similarities Graph."
+
+    for edge in edges(graph_data.genotype_graph)
+        u, v = src(edge), dst(edge)
+
+        if haskey(phenotype_similarities, (u, v)) == false continue end
+
+        similarity = phenotype_similarities[(u, v)]
+        add_edge!(phenotype_graph, u, v, similarity)        
     end
 
     graph.phenotype_graph = phenotype_graph
