@@ -71,7 +71,7 @@ function build_phenotype_graph!(graph_data::GGraphData, min_occurances, toleranc
 
         if u == v continue end
         if (v, u) in edges_to_test continue end
-        if has_edge(graph.genotype_graph, u, v) == false continue end
+        if has_edge(graph_data.genotype_graph, u, v) == false continue end
         if graph_data.genotype_graph.weights[u, v] < min_occurances continue end
 
         push!(edges_to_test, (u, v))
