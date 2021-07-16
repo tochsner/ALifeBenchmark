@@ -38,12 +38,19 @@ function build_genotype_graph!(graph_data::GGraphData)
 
     genotype_graph = SimpleWeightedDiGraph(length(genotype_mapping))
 
+    count = 0
+
     for ((parent, offspring), num) in parent_offsprings
         if haskey(genotype_mapping, offspring) == false continue end   # we skip sinks without offsprings
 
         parent_index = genotype_mapping[parent]
         offspring_index = genotype_mapping[offspring]        
         add_edge!(genotype_graph, parent_index, offspring_index, num)
+
+        count += 1
+        if count % 1000 == 0
+            @info (count / length(parent_offsprings))
+        end
     end
 
     @info "Graph built."
