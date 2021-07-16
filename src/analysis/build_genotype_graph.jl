@@ -27,14 +27,14 @@ function build_genotype_graph!(graph_data::GGraphData)
     parent_offsprings = deserialize(CALCULATED_FOLDER * "parent_offspring_ocurrances")
 
     genotype_mapping = Bijection()
+    all_parents = Set()
 
-    for ((parent, offspring), _) in parent_offsprings
+    for ((parent, _), num) in parent_offsprings
         if haskey(genotype_mapping, parent) == false
             genotype_mapping[parent] = length(genotype_mapping) + 1
         end
-        if haskey(genotype_mapping, offspring) == false
-            genotype_mapping[offspring] = length(genotype_mapping) + 1
-        end
+
+        push!(all_parents, parent)
     end
 
     @info "Mapping created. Building graph..."
@@ -42,6 +42,8 @@ function build_genotype_graph!(graph_data::GGraphData)
     genotype_graph = SimpleWeightedDiGraph(length(genotype_mapping))
 
     for ((parent, offspring), num) in parent_offsprings
+        if offspring in all_parents == false continue end   # we skip sinks without offsprings
+
         parent_index = genotype_mapping[parent]
         offspring_index = genotype_mapping[offspring]        
         add_edge!(genotype_graph, parent_index, offspring_index, num)
