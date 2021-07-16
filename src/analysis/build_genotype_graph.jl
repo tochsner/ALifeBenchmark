@@ -79,22 +79,29 @@ function build_phenotype_graph!(graph_data::GGraphData, min_occurances, toleranc
 
     @info "Calculate Phenotype Similarities for $(length(edges_to_test)) edges."
 
-    phenotype_similarities = Dict()
+    num_edges_to_test = length(edges_to_test)
+    phenotype_similarities = SharedArrays.SharedArray{Float64}(num_edges_to_test)
 
     done = Threads.Atomic{Int}(0)
-    re_lock = ReentrantLock()
 
-    @threads for (u, v) in edges_to_test
+    @threads for (i, (u, v)) in unique(enumerate(edges_to_test))
         genotype_u, genotype_v = graph_data.genotype_vertex_mapping(u), graph_data.genotype_vertex_mapping(v)
         similarity = get_phenotype_similarity(genotype_u, genotype_v, tolerance, min_samples, max_samples)
 
-        lock(re_lock) do
-            phenotype_similarities[(u, v)] = similarity
-            phenotype_similarities[(v, u)] = similarity
-        end
+        phenotype_similarities[i] = similarity
 
         Threads.atomic_add!(done, 1)
         @info (done[] / length(edges_to_test))
+    end
+
+    phenotype_similarities_dict = Dict()
+
+    for i in 1:num_edges_to_test
+        similariry = phenotype_similarities[i]
+        u, v = edges_to_test[i]
+
+        phenotype_similarities_dict[(u, v)] = similariry
+        phenotype_similarities_dict[(v, u)] = similariry
     end
 
     @info "Build Phenotype Similarities Graph."
@@ -102,9 +109,9 @@ function build_phenotype_graph!(graph_data::GGraphData, min_occurances, toleranc
     for edge in edges(graph_data.genotype_graph)
         u, v = src(edge), dst(edge)
 
-        if haskey(phenotype_similarities, (u, v)) == false continue end
+        if haskey(phenotype_similarities_dict, (u, v)) == false continue end
 
-        similarity = phenotype_similarities[(u, v)]
+        similarity = phenotype_similarities_dict[(u, v)]
         add_edge!(phenotype_graph, u, v, similarity)        
     end
 
