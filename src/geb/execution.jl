@@ -24,11 +24,11 @@ function execute!(model::GebModel)
         activation_size_in_batch[i] = 0
     end
     
-    for (i, organism) in organisms_in_batch
+    @threads for (i, organism) in organisms_in_batch
         develop_nodes!(organism.network, organism.rules)
     end
     
-    for (i, organism) in organisms_in_batch
+    @threads for (i, organism) in organisms_in_batch
         activations = determine_input_activations(model, organism)
         num_outputs = length(activations)
         
@@ -36,7 +36,7 @@ function execute!(model::GebModel)
         activation_size_in_batch[i] = num_outputs
     end
     
-    for (i, organism) in organisms_in_batch
+    @threads for (i, organism) in organisms_in_batch
         activate_inputs!(organism.network, activations_in_batch[i, 1:activation_size_in_batch[i]])
     end
 
