@@ -37,3 +37,7 @@ function _wasserstein(distribution_1, distribution_2, metric)
 
     return wasserstein_distance
 end
+
+function weighted_rand(sequence, weights::Vector{Float64})
+    sequence[findfirst(cumsum(weights) .> rand())]
+end

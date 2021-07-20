@@ -1,5 +1,5 @@
-function estimate(get_sample, rel_tolerance, min_samples, max_samples; print_progress = false)
-    estimate(get_sample, _get_new_estimation, _get_estimation_variance, rel_tolerance, min_samples, max_samples, print_progress = print_progress)
+function estimate(get_sample, rel_tolerance, min_samples, max_samples; print_progress = false, return_all_samples = false)
+    estimate(get_sample, _get_new_estimation, _get_estimation_variance, rel_tolerance, min_samples, max_samples, print_progress = print_progress, return_all_samples = return_all_samples)
 end
 
 function _get_new_estimation(sample::Number, previous_samples, previous_estimation)
@@ -25,10 +25,10 @@ function _get_estimation_variance(sample, previous_samples, estimate)
     n = length(all_samples)
     mean = sum(all_samples) / n
 
-    return 1 / (n * (n - 1)) * sum([(s - mean)^2 for s in all_samples]) / max(EPS, mean)  
+    return 1 / (n * (n - 1)) * sum([(s - mean)^2 for s in all_samples]) / max(EPS, mean^2)  
 end
 
-function estimate(get_sample, get_new_estimation, get_estimation_variance, tolerance, min_samples, max_samples; print_progress = false)
+function estimate(get_sample, get_new_estimation, get_estimation_variance, tolerance, min_samples, max_samples; print_progress = false, return_all_samples = false)
     previous_samples = []
     num_samples = 0
 
@@ -55,7 +55,11 @@ function estimate(get_sample, get_new_estimation, get_estimation_variance, toler
         end
     end
 
-    return estimation
+    if return_all_samples
+        return estimation, previous_samples
+    else
+        return estimation
+    end
 end
 
 _add_sample!(previous_samples::Vector, new_sample) = push!(previous_samples, new_sample)

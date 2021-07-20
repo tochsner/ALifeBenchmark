@@ -5,19 +5,13 @@ function get_phenotype_similarity(genotype_1, genotype_2, rel_tolerance, min_sam
     if genotype_1 == genotype_2 return 0.0 end
 
     similarity = estimate(rel_tolerance, min_samples, max_samples) do
-        NUM_PARALLEL = 16
+	    snapshot = sample_snapshot_id() |> get_snapshot
+        sample = get_organisms(snapshot) |> rand
+        sample_id = get_id(snapshot, sample)
 
-	    snapshots = [sample_snapshot_id() |> get_snapshot for _ in 1:NUM_PARALLEL]        
-	    samples = [get_id(s, get_organisms(s) |> rand) for s in snapshots]
-        sample_similarities = zeros(NUM_PARALLEL)
-        
-        @threads for t in 1:NUM_PARALLEL
-            sample = samples[t]
-            snapshot = snapshots[t]
-            sample_similarities[t] = (get_fitness(snapshot, sample, genotype_1) - get_fitness(snapshot, sample, genotype_2))^2            
-        end
+        sample_similaritiy = (get_fitness(snapshot, sample_id, genotype_1) - get_fitness(snapshot, sample_id, genotype_2))^2            
 
-        return sample_similarities
+        return sample_similaritiy
     end
 
     return similarity
