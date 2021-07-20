@@ -73,7 +73,7 @@ function fire!(node)
     if inhibitory_activation <= 0
         excitatory_output = excitatory_activation
         
-        noise = 2*NOISE_LEVEL*rand() - NOISE_LEVEL
+        noise = 2*NOISE_LEVEL_NODES*rand() - NOISE_LEVEL_NODES
         excitatory_output += noise
         
         excitatory_output = max(excitatory_output, EXCITATORY_MIN)

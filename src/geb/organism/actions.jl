@@ -24,26 +24,27 @@ function perform!(action::GebAction, model::GebModel, organism::GebOrganism)
     prefix = _get_prefix(action)
 
     excitatory_sum = 0
+    has_match = false
 
     for external in organism.network.external_outputs
         if _is_match(prefix, external.string)
             excitatory_sum += sum(external.excitatory_activation)
+            has_match = true
         end
     end
     
-    excitatory_sum += 2*NOISE_LEVEL*rand() - NOISE_LEVEL   
-
-    excitatory_sum = max(excitatory_sum, EXCITATORY_MIN)
-    excitatory_sum = min(excitatory_sum, EXCITATORY_MAX)
-    
-    excitatory_sum -= EXCITATORY_MIN
-    excitatory_sum /= (EXCITATORY_MAX - EXCITATORY_MIN)
+    if has_match
+        excitatory_sum = max(excitatory_sum, 1)
+    else
+        excitatory_sum = NOISE_LEVEL_MISSING_OUTPUT*rand()
+    end
 
     perform!(action, model, organism, excitatory_sum)
 end
 
 function perform!(::CrossOver, model::GebModel, parent_1::GebOrganism, activation)
     if activation < CROSS_OVER_THRESHOLD return end
+
     parent_2 = _get_organism_in_front(model, parent_1)
 
     if parent_2 === nothing return end

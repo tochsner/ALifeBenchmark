@@ -56,7 +56,7 @@ function determine_input_activations(model::GebModel, organism::GebOrganism)
                     distances[neighbor] = @fastmath norm(organism.coordinates .- neighbor.coordinates)
                 end
 
-                sum += (neighbor_sum / distances[neighbor])
+                sum += DISTANCE_SCALE_FACTOR * (neighbor_sum / distances[neighbor])
             end
         end
 
