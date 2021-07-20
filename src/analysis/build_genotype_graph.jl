@@ -135,7 +135,7 @@ function build_phenotype_graph!(graph_data::GGraphData, min_occurances, toleranc
         add_edge!(phenotype_graph, u, v, similarity)        
     end
 
-    graph.phenotype_graph = phenotype_graph
+    graph_data.phenotype_graph = phenotype_graph
 end
 
 function analyse_phenotype_graph(graph_data::GGraphData)
