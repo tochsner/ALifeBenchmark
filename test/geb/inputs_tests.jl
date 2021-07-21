@@ -35,6 +35,7 @@ end
     """
 
     @assert ALifeBenchmark.INFLUENCE_RADIUS == 2
+    @assert ALifeBenchmark.MIN_ORGANISMS == 0
 
     model = ALifeBenchmark.GebModel(size=7)
 

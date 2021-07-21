@@ -28,9 +28,7 @@ function get_number_neurons(network)
     return num_neurons
 end
 
-function update_inputs_outputs!(network, starting_nodes)
-    _remove_external_nodes(network)
-    
+function update_inputs_outputs!(network, starting_nodes)    
     clear!(network.inputs)
     clear!(network.outputs)
 
@@ -42,24 +40,29 @@ function update_inputs_outputs!(network, starting_nodes)
         elseif x.type == OutputNode()
             push!(network.outputs, x)
         end
-    end
-
-    _add_external_nodes(network)
+    end        
 end
 
-function _remove_external_nodes(network)
-    for input in network.inputs
-        deleteif!(input.in_excitatory, x -> x.type == ExternalNode())
-        deleteif!(input.in_inhibitory, x -> x.type == ExternalNode())
+function remove_non_reachable_nodes!(network)
+    apply_to_all(network) do node
+        node.reachable_from_input = false
     end
-    for output in network.outputs
-        deleteif!(output.out_excitatory, x -> x.type == ExternalNode())
-        deleteif!(output.out_inhibitory, x -> x.type == ExternalNode())
+
+    apply_to_all(network.inputs, only_to_outputs = true) do node
+        node.reachable_from_input = true
     end
-    clear!(network.external_outputs)
+
+    apply_to_all(network) do node
+        filter!(x -> x.reachable_from_input, node.in_inhibitory)
+        filter!(x -> x.reachable_from_input, node.in_excitatory)
+        filter!(x -> x.reachable_from_input, node.out_inhibitory)
+        filter!(x -> x.reachable_from_input, node.out_excitatory)
+    end
+
+    filter!(x -> x.reachable_from_input, network.outputs)
 end
 
-function _add_external_nodes(network)
+function add_external_nodes!(network)
     external_inputs = Dict()
     for input in network.inputs
         if haskey(external_inputs, input.string)
@@ -85,14 +88,25 @@ function _add_external_nodes(network)
             external = Node(output.string, [], [], [], [])
             external.type = ExternalNode()
             external_outputs[output.string] = external
+            push!(network.external_outputs, external)
         end
         
         push!(external.in_excitatory, output)
         push!(external.in_inhibitory, output)
 
         push!(output.out_excitatory, external)
-        push!(output.out_inhibitory, external)
-        
-        push!(network.external_outputs, external)
+        push!(output.out_inhibitory, external)        
     end
+end
+
+function remove_external_nodes!(network)
+    for input in network.inputs
+        deleteif!(input.in_excitatory, x -> x.type == ExternalNode())
+        deleteif!(input.in_inhibitory, x -> x.type == ExternalNode())
+    end
+    for output in network.outputs
+        deleteif!(output.out_excitatory, x -> x.type == ExternalNode())
+        deleteif!(output.out_inhibitory, x -> x.type == ExternalNode())
+    end
+    clear!(network.external_outputs)
 end

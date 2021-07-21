@@ -41,13 +41,13 @@ function determine_input_activations(model::GebModel, organism::GebOrganism)
             relevant_neighbors = right_neighbors
         end
 
-        sum = 0.0
+        activation_sum = 0.0
         for neighbor in relevant_neighbors
             neighbor_sum = 0.0
 
             for output in neighbor.network.external_outputs
-                if _is_match(string[2:end], output.string) && length(output.excitatory_activation) == 1
-                    neighbor_sum += output.excitatory_activation[1]
+                if _is_match(string[2:end], output.string)
+                    neighbor_sum += sum([a for (a, n) in zip(output.excitatory_activation, output.in_excitatory) if n.has_fired])
                 end
             end
 
@@ -56,13 +56,15 @@ function determine_input_activations(model::GebModel, organism::GebOrganism)
                     distances[neighbor] = @fastmath norm(organism.coordinates .- neighbor.coordinates)
                 end
 
-                sum += DISTANCE_SCALE_FACTOR * (neighbor_sum / distances[neighbor])
+                activation_sum += DISTANCE_SCALE_FACTOR * (neighbor_sum / distances[neighbor])
             end
         end
 
-        push!(activations, sum)
-    end   
+        
+        push!(activations, activation_sum)
+    end
     
+    println(activations)
     return activations
 end
 

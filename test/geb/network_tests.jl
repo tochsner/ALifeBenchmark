@@ -5,7 +5,7 @@
     @test [n.string for n in network.outputs] == ["01"]
 end
 
-@testset "Network Development Test" begin
+@testset "Network Development 1 Test" begin
     network = ALifeBenchmark.get_axiom_network()
 
     rules = [
@@ -20,6 +20,22 @@ end
 
     @test [n.string for n in network.inputs] == ["0", "01"]
     @test [n.string for n in network.outputs] == ["01", "000"]
+end
+
+@testset "Network Development 2 Test" begin
+    network = ALifeBenchmark.get_axiom_network()
+
+    rules = [
+        ALifeBenchmark.Rule("0", "011", "1101", false, true, false, false, false, true, 1, 1),
+        ALifeBenchmark.Rule("00", "101", "", false, true, true, true, false, false, 1, 1),
+        ALifeBenchmark.Rule("011", "", "0110", false, false, true, true, false, false, 1, 1),
+        ALifeBenchmark.Rule("1101", "110", "1010", false, true, true, false, false, true, 1, 1),
+    ]
+
+    ALifeBenchmark.develop_nodes!(network, rules)
+
+    @test [n.string for n in network.inputs] == ["101"]
+    @test [n.string for n in network.outputs] == ["011", "1101"]
 end
 
 @testset "Activation Propagation Test" begin
@@ -65,6 +81,7 @@ end
 
     network = ALifeBenchmark.Network()
     ALifeBenchmark.update_inputs_outputs!(network, [node1])
+    ALifeBenchmark.add_external_nodes!(network)
 
     @test length(network.inputs) == 2
     @test length(network.outputs) == 2

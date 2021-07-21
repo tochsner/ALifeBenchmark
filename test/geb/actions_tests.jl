@@ -174,6 +174,7 @@ end
 
     network = ALifeBenchmark.Network()
     ALifeBenchmark.update_inputs_outputs!(network, [node1])
+    ALifeBenchmark.add_external_nodes!(network)
     ALifeBenchmark.activate_inputs!(network, [0, 0], [0, 0])
 
     # build Geb model
@@ -192,6 +193,6 @@ end
 
     ALifeBenchmark.perform!(model, organism_11)
 
-    @test organism_11.coordinates == (0.8611964416081808, 0.5)
-    @test organism_11.direction == 7
+    @test organism_11.coordinates == (0.5, 0.5)
+    @test organism_11.direction == 34
 end

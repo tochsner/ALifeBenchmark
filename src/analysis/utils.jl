@@ -1,13 +1,15 @@
 function get_genotype_distribution(snapshot)
+    get_distribution([get_genotype(snapshot, organism) for organism in get_organisms(snapshot)])
+end
+
+function get_distribution(values)
     distribution = Dict()
 
-    for organism in get_organisms(snapshot)
-        genotype = get_genotype(snapshot, organism)
-
-        if haskey(distribution, genotype)
-            distribution[genotype] += 1
+    for value in values
+        if haskey(distribution, value)
+            distribution[value] += 1
         else
-            distribution[genotype] = 1
+            distribution[value] = 1
         end
     end
 

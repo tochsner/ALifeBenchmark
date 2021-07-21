@@ -32,6 +32,7 @@ function perform!(action::GebAction, model::GebModel, organism::GebOrganism)
             has_match = true
         end
     end
+
     
     if has_match
         excitatory_sum = max(excitatory_sum, 1)

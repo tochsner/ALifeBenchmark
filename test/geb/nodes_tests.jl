@@ -173,7 +173,6 @@ end
 
     @test node4.out_inhibitory[1] == node5
     @test node5.in_inhibitory[1] == node4
-
 end
 
 @testset "Complete Development Test 2" begin

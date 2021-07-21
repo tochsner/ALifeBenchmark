@@ -91,3 +91,27 @@ function n_shape_space_covering(graph_data::GGraphData, n)
 
     return mean(reachable_percentages)
 end
+
+function get_corresponding_neutral_networks(graph_data::GGraphData, genotypes)
+    [get_corresponding_neutral_network(graph_data, genotype) for genotype in genotypes]
+end
+function get_corresponding_neutral_network(graph_data::GGraphData, genotype)
+    if haskey(graph_data.genotype_vertex_mapping, genotype) == false return 0 end
+
+    for (i, neutral_network) in enumerate(graph_data.neutral_networks)        
+        if graph_data.genotype_vertex_mapping[genotype] in neutral_network
+            return i
+        end
+    end
+
+    return 0
+end
+
+function get_neutral_network_distribution(graph_data::GGraphData, snapshot)
+    organisms = get_organisms(snapshot)
+    genotypes = [get_genotype(snapshot, organism) for organism in organisms]
+    neutral_networks = get_corresponding_neutral_networks(graph_data, genotypes)
+    nn_distribution = get_distribution(neutral_networks)
+
+    return nn_distribution
+end

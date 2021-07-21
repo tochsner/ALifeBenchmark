@@ -14,18 +14,13 @@ function set_logger!(tierrian_model::TierraModel, logger::Logger)
 end
 
 get_id(::TierraModel, tierrian_organism::TierrianOrganism) = tierrian_organism.key
-get_genotype_id(::TierraModel, tierrian_organism::TierrianOrganism) = tierrian_organism.hash
 function get_genotype(tierrian_model::TierraModel, tierrian_organism::TierrianOrganism)
     read_memory(tierrian_model, tierrian_organism.start_address, tierrian_organism.length)
 end
-function get_parent_genotype_id(::TierraModel, tierrian_organism::TierrianOrganism)
-    tierrian_organism.parent_hash
-end
-
 function get_position(::TierraModel, tierrian_organism::TierrianOrganism)
     TierrianPosition(tierrian_organism.start_address, tierrian_organism.length)
 end
-function get_environment(::TierraModel, tierrian_organism::TierrianOrganism)
+function get_environment(::TierraModel, ::TierrianOrganism)
     TierrianEnvironment()
 end
 function get_time_birth(::TierraModel, tierrian_organism::TierrianOrganism)
@@ -38,7 +33,7 @@ function get_age(::TierraModel, tierrian_organism::TierrianOrganism)
     tierrian_organism.age
 end
 
-get_daughters(TierraModel, tierrian_organism::TierrianOrganism) = tierrian_organism.daughters
+get_daughters(::TierraModel, tierrian_organism::TierrianOrganism) = tierrian_organism.daughters
 
 function get_abstracted_organism(model::TierraModel, model_organism::TierrianOrganism, parent_ids, parent_genotypes)
     return Organism{TierrianPosition, TierrianEnvironment, Vector{UInt8}}(

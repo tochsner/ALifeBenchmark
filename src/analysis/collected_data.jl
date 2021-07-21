@@ -27,7 +27,7 @@ end
 
 function get_snapshot_ids(trial_id::String)
     snapshot_ids = []
-
+    
     for filename in readdir(SNAPSHOTS_FOLDER)
         current_trial_id, snapshot_id = split(filename, "_")
         

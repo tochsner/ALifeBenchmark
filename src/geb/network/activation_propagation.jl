@@ -53,7 +53,7 @@ function excite!(target, source::Node, activation)
 end
 function excite!(target, source_index::Int, activation)
     target.excitatory_activation[source_index] = activation
-    
+
     if _can_fire(target)
         fire!(target)
     end
@@ -70,10 +70,10 @@ function fire!(node)
 
     node.has_fired = true
 
-    if inhibitory_activation <= 0
+    if inhibitory_activation <= 0.0
         excitatory_output = excitatory_activation
         
-        noise = 2*NOISE_LEVEL_NODES*rand() - NOISE_LEVEL_NODES
+        noise = 2.0*NOISE_LEVEL_NODES*rand() - NOISE_LEVEL_NODES
         excitatory_output += noise
         
         excitatory_output = max(excitatory_output, EXCITATORY_MIN)
@@ -82,7 +82,7 @@ function fire!(node)
         excitatory_output -= EXCITATORY_MIN
         excitatory_output /= (EXCITATORY_MAX - EXCITATORY_MIN)
     end    
-       
+    
     if INHIBITORY_THRESHOLD <= excitatory_activation
         inhibitory_output = 1
     end    

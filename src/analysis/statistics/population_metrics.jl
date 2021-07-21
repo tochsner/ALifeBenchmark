@@ -33,3 +33,10 @@ function get_phenotype_diversity(snapshot, rel_tolerance, min_samples, max_sampl
 
     return genotype_diversity
 end
+
+function get_neutrality(snapshot, graph_data)
+    genotype_distribution = get_genotype_distribution(snapshot)
+    nn_distribution = get_neutral_network_distribution(graph_data, snapshot)
+
+    return get_entropy(genotype_distribution) - get_entropy(nn_distribution)
+end

@@ -23,7 +23,13 @@ end
 function save_graph_data(graph::GGraphData)
     serialize(CALCULATED_FOLDER * "GGraphData", graph)
 end
-load_graph_data() = deserialize(CALCULATED_FOLDER * "GGraphData")
+function load_graph_data() 
+    if isfile(CALCULATED_FOLDER * "GGraphData")
+        deserialize(CALCULATED_FOLDER * "GGraphData")
+    else
+        GGraphData()
+    end
+end   
 
 function get_overall_genotype_distribution(graph_data::GGraphData)
     occurances = []

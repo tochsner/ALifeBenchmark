@@ -22,6 +22,7 @@ export get_adaption_of_genotype, get_adaption_of_snapshot
 export is_reproducing
 export get_entropy
 export get_genotype_diversity
+export get_neutrality
 
 export _wasserstein, get_genotype_distribution
 
@@ -87,18 +88,19 @@ include("analysis/estimator.jl")
 
 include("analysis/utils.jl")
 include("analysis/graph_utils.jl")
-include("analysis/phenotype_similarity.jl")
-include("analysis/reachable_diversity.jl")
-include("analysis/reachable_fitness.jl")
-include("analysis/T_similarity.jl")
-include("analysis/evolutionary_potential.jl")
-include("analysis/level_of_adaption.jl")
-include("analysis/reproducability.jl")
-include("analysis/entropy.jl")
-include("analysis/population_metrics.jl")
 
-include("analysis/build_genotype_graph.jl")
-include("analysis/analyse_neutral_networks.jl")
+include("analysis/statistics/phenotype_similarity.jl")
+include("analysis/statistics/reachable_diversity.jl")
+include("analysis/statistics/reachable_fitness.jl")
+include("analysis/statistics/T_similarity.jl")
+include("analysis/statistics/evolutionary_potential.jl")
+include("analysis/statistics/level_of_adaption.jl")
+include("analysis/statistics/reproducability.jl")
+include("analysis/statistics/entropy.jl")
+include("analysis/statistics/population_metrics.jl")
+
+include("analysis/GP_maps/build_gp_map.jl")
+include("analysis/GP_maps/analyse_neutral_networks.jl")
 
 
 # Null Models
@@ -149,6 +151,7 @@ include("geb/network/node.jl")
 include("geb/network/network.jl")
 include("geb/network/BFS.jl")
 
+include("geb/network/axiom_network.jl")
 include("geb/network/rule_decoding.jl")
 include("geb/network/development.jl")
 

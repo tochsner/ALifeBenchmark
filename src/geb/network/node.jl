@@ -24,13 +24,14 @@ mutable struct Node
     excitatory_activation::Vector{Float64}
 
     has_fired::Bool
+    reachable_from_input::Bool
 
     function Node(string, in_inhibitory, out_inhibitory, in_excitatory, out_excitatory)
         new(string, in_inhibitory, out_inhibitory, in_excitatory, out_excitatory,
-            [], [], [], [], HiddenNode(), [], [], false)
+            [], [], [], [], HiddenNode(), [], [], false, false)
     end
 
-    Node(string) = new(string, [], [], [], [], [], [], [], [], HiddenNode(), [], [], false)
+    Node(string) = new(string, [], [], [], [], [], [], [], [], HiddenNode(), [], [], false, false)
 end
 
 function fill_temp!(node)
