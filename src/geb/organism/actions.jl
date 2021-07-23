@@ -26,14 +26,13 @@ function perform!(action::GebAction, model::GebModel, organism::GebOrganism)
     excitatory_sum = 0
     has_match = false
 
-    for external in organism.network.external_outputs
+    for external in organism.network.outputs
         if _is_match(prefix, external.string)
-            excitatory_sum += sum(external.excitatory_activation)
+            excitatory_sum += external.io_value
             has_match = true
         end
     end
 
-    
     if has_match
         excitatory_sum = max(excitatory_sum, 1)
     else

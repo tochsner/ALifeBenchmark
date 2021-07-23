@@ -32,7 +32,7 @@ function load_graph_data()
 end   
 
 function get_overall_genotype_distribution(graph_data::GGraphData)
-    occurances = []
+    occurances = Int64[]
 
     for vertex in 1:nv(graph_data.genotype_graph)
         outgoing = outneighbors(graph_data.genotype_graph, vertex)
@@ -137,7 +137,7 @@ function build_phenotype_graph!(graph_data::GGraphData, min_occurances, toleranc
 
         if haskey(phenotype_similarities_dict, (u, v)) == false continue end
 
-        similarity = phenotype_similarities_dict[(u, v)]
+        similarity = max(eps(), phenotype_similarities_dict[(u, v)])
         add_edge!(phenotype_graph, u, v, similarity)        
     end
 

@@ -42,13 +42,17 @@ function analyse_neutral_networks(graph_data::GGraphData)
     # println("Assortativity: \t $(analyse_neutral_networks(graph_data, assortativity))")
 end
 
+get_average_nn_size(graph_data::GGraphData) = analyse_neutral_networks(graph_data, nv)
+
 function analyse_neutral_networks(graph_data::GGraphData, metric)
     genotype_weights = get_overall_genotype_distribution(graph_data)
+    total_used_weights = 0
 
     result = 0
 
     for neutral_network in graph_data.neutral_networks
         neutral_network_weight = sum(genotype_weights[neutral_network]) # 1 / length(graph_data.neutral_networks) # 
+        total_used_weights += neutral_network_weight
 
         graph, vertex_mapping = induced_subgraph(graph_data.genotype_graph, neutral_network)
         
@@ -67,7 +71,7 @@ function analyse_neutral_networks(graph_data::GGraphData, metric)
         result += neutral_network_weight * current_result
     end
 
-    return result
+    return result / total_used_weights
 end
 
 function analyse_neutral_network_graph(graph_data::GGraphData)

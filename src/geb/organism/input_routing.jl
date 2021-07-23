@@ -59,12 +59,10 @@ function determine_input_activations(model::GebModel, organism::GebOrganism)
                 activation_sum += DISTANCE_SCALE_FACTOR * (neighbor_sum / distances[neighbor])
             end
         end
-
         
         push!(activations, activation_sum)
     end
-    
-    println(activations)
+        
     return activations
 end
 

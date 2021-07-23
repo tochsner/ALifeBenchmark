@@ -17,7 +17,7 @@ end
 function get_fitness(snapshot, organism)
     num_reproducing_daughters = length([
         d for d in get_daughters(snapshot, organism) 
-        if get_genotype_id(snapshot, organism) == get_genotype_id(snapshot, d) || !isempty(get_daughters(snapshot, d))
+        if get_genotype(snapshot, organism) == get_genotype(snapshot, d) || !isempty(get_daughters(snapshot, d))
     ])
     age = get_age(snapshot, organism)
     fitness = num_reproducing_daughters / age
@@ -48,7 +48,7 @@ function simulate_organism!(snapshot, key_to_replace::UInt64, new_genotype)
 
         return !(new_organism in living_organisms) &&
                 all([
-                    get_genotype_id(snapshot, new_organism) == get_genotype_id(snapshot, d) || 
+                    get_genotype(snapshot, new_organism) == get_genotype(snapshot, d) || 
                     !(d in get_organisms(snapshot)) 
                     
                     for d in get_daughters(snapshot, new_organism)
@@ -78,10 +78,8 @@ set_logger!(snapshot)
 
 get_id(snapshot, organism)
 
-get_genotype_id(snapshot, organism)
-get_genotype_id(genotype)
 get_genotype(snapshot, organism)
-get_parent_genotype_id(snapshot, organism)
+get_parent_genotype(snapshot, organism)
 
 get_position(snapshot, organism)
 get_environment(snapshot, organism)

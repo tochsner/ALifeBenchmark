@@ -2,15 +2,16 @@ using Gtk, Graphics
 using ALifeBenchmark
 import Random
 using Profile
+using Serialization
 
-model = GebModel(size=20)
+model = deserialize("geb_logs/snapshots/778557744733939_842507053402753") # GebModel(size=20)
 
 c = @GtkCanvas()
 win = GtkWindow(c, "Geb", 1000, 800)
 showall(win)
 
 function paint(ctx, h, w, model::GebModel)
-    set_source_rgb(ctx, 0.9, 0.9, 0.9)
+    set_source_rgb(ctx, 0.5, 0.5, 0.5)
     
     for i in 1:(model.size-1)
         move_to(ctx, 0, h/model.size * i)
@@ -33,8 +34,8 @@ function paint(ctx, h, w, organism::GebOrganism)
     x, y = x / model.size, y / model.size
     x, y = x*w, y*h
 
-    set_source_rgb(ctx, 0, 0, 1)
-    
+    set_source_rgb(ctx, 0, 0, min(1.0, organism.age / 10))
+
     circle(ctx, x, y, 3)
     fill(ctx)
     
@@ -74,6 +75,7 @@ function run(m, n)
         end
 
         println(model)        
+
 
         for _ in 1:200
             execute!(model) 

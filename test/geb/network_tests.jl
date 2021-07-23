@@ -81,7 +81,6 @@ end
 
     network = ALifeBenchmark.Network()
     ALifeBenchmark.update_inputs_outputs!(network, [node1])
-    ALifeBenchmark.add_external_nodes!(network)
 
     @test length(network.inputs) == 2
     @test length(network.outputs) == 2
@@ -89,36 +88,23 @@ end
     @test network.inputs == [node1, node2]
     @test network.outputs == [node6, node7]
 
-    @test length(node1.in_excitatory) == 1
-    @test length(node1.in_inhibitory) == 1
-    @test length(node2.in_excitatory) == 1
-    @test length(node2.in_inhibitory) == 1
-    @test length(node6.out_excitatory) == 2
-    @test length(node6.out_inhibitory) == 1
-    @test length(node7.out_excitatory) == 1
-    @test length(node7.out_inhibitory) == 1
+    ALifeBenchmark.activate_inputs!(network, [0, 0])
 
-    @test node1.in_excitatory[1].type == ALifeBenchmark.ExternalNode()
-    @test node1.in_inhibitory[1].type == ALifeBenchmark.ExternalNode()
-    @test node2.in_excitatory[1].type == ALifeBenchmark.ExternalNode()
-    @test node2.in_inhibitory[1].type == ALifeBenchmark.ExternalNode()
-    @test node6.out_excitatory[2].type == ALifeBenchmark.ExternalNode()
-    @test node6.out_inhibitory[1].type == ALifeBenchmark.ExternalNode()
-    @test node7.out_excitatory[1].type == ALifeBenchmark.ExternalNode()
-    @test node7.out_inhibitory[1].type == ALifeBenchmark.ExternalNode()
-   
-    ALifeBenchmark.activate_inputs!(network, [0, 0], [0, 0])
-
-    @test node6.out_excitatory[2].excitatory_activation == [0.2805599027529448]
-    @test node7.out_excitatory[1].excitatory_activation == [0.21156818398564092]
-    @test node6.out_excitatory[2].inhibitory_activation == [0]
-    @test node7.out_excitatory[1].inhibitory_activation == [0]
+    @test node1.io_value == 0.0
+    @test node2.io_value == 0.0
+    @test node3.io_value == 0.0
+    @test node4.io_value == 0.0
+    @test node5.io_value == 0.0
+    @test node6.io_value == 0.2805599027529448
+    @test node7.io_value == 0.21156818398564092
     
-    ALifeBenchmark.activate_inputs!(network, [1, 2], [1, 0])
+    ALifeBenchmark.activate_inputs!(network, [1, 2])
     
-    @test node6.out_excitatory[2].excitatory_activation == [0.10999587928642951]
-    @test node7.out_excitatory[1].excitatory_activation == [0.37576338834068457]
-    @test node6.out_excitatory[2].inhibitory_activation == [1.0]
-    @test node7.out_excitatory[1].inhibitory_activation == [1.0]
-
+    @test node1.io_value == 1.0
+    @test node2.io_value == 2.0
+    @test node3.io_value == 0.0
+    @test node4.io_value == 0.0
+    @test node5.io_value == 0.0
+    @test node6.io_value == 0.16094874272296766
+    @test node7.io_value == 0.7302818081187501
 end

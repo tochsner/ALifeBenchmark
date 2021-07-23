@@ -65,8 +65,8 @@ function replace_organism!(model::GebModel, key::UInt64, new_genotype::String)
     return new_organism
 end
 
-function run_until(termination_predicate, model::GebModel)
-    while termination_predicate(logger, model) == false
+function run_until!(termination_predicate, model::GebModel)
+    while termination_predicate(model) == false
         execute!(model)
     end
 end

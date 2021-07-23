@@ -26,12 +26,14 @@ mutable struct Node
     has_fired::Bool
     reachable_from_input::Bool
 
+    io_value::Float64
+
     function Node(string, in_inhibitory, out_inhibitory, in_excitatory, out_excitatory)
         new(string, in_inhibitory, out_inhibitory, in_excitatory, out_excitatory,
-            [], [], [], [], HiddenNode(), [], [], false, false)
+            [], [], [], [], HiddenNode(), [], [], false, false, 0)
     end
 
-    Node(string) = new(string, [], [], [], [], [], [], [], [], HiddenNode(), [], [], false, false)
+    Node(string) = new(string, [], [], [], [], [], [], [], [], HiddenNode(), [], [], false, false, 0)
 end
 
 function fill_temp!(node)

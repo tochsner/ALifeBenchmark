@@ -4,7 +4,6 @@ function develop_nodes!(network::Network, rules)
     if network.fully_developed return end
     if length(rules) == 0 return end
  
-    remove_external_nodes!(network)
     apply_to_all(fill_temp!, network)
     
     any_change = false
@@ -36,14 +35,18 @@ function develop_nodes!(network::Network, rules)
     
     update_inputs_outputs!(network, reachable_nodes)
     remove_non_reachable_nodes!(network)
-    add_external_nodes!(network)
+
+    network.num_development_steps += 1
+    if MAX_DEVELOPMENT_STEPS <= network.num_development_steps
+        network.fully_developed = true
+    end
 end
 
 function _develop_node!(node, rules)
     best_matching_rules = find_best_matches(node, rules)
 
     if 0 < length(best_matching_rules)
-        rule_to_apply = rand(best_matching_rules)
+        rule_to_apply = first(best_matching_rules)
         return _apply_rule!(rule_to_apply, node)
     else
         return [node]

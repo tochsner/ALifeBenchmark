@@ -87,9 +87,9 @@ function collect_cross_statistic(abbrevation, trial_id, get_statistic, prepare)
     snapshot_ids = get_snapshot_ids(trial_id)
     num_snapshots = length(snapshot_ids)
 
-    values = SharedArray{Float64}(num_snapshots)
-    times_1 = SharedArray{UInt64}(num_snapshots)
-    times_2 = SharedArray{UInt64}(num_snapshots)
+    values = SharedArray{Float64}(num_snapshots^2)
+    times_1 = SharedArray{UInt64}(num_snapshots^2)
+    times_2 = SharedArray{UInt64}(num_snapshots^2)
 
     done = Threads.Atomic{Int}(0)
 
@@ -112,9 +112,12 @@ function collect_cross_statistic(abbrevation, trial_id, get_statistic, prepare)
             times_2[index] = time_2
 
             Threads.atomic_add!(done, 1)
-            @info "$abbrevation \t $(done[] / num_snapshots / num_snapshots) \t $time_1 \t $time_2 \t $current_value"
-
+            
             if done[] % 1000 == 0
+                @info "$abbrevation \t $(done[] / num_snapshots / num_snapshots) \t $time_1 \t $time_2 \t $current_value"
+            end
+
+            if done[] % 100_000 == 0
                 plot_result(times_1, times_2, values, abbrevation, trial_id)
                 save_result((times_1, times_2, values), abbrevation, trial_id)
             end
@@ -147,7 +150,6 @@ end
 @info ARGS
 
 if type_of_analysis == "LA"
-
     result = collect_compare_to_end_statistic(
         type_of_analysis, 
         trial_id, 
@@ -156,15 +158,12 @@ if type_of_analysis == "LA"
     )
 
 elseif type_of_analysis == "RF"
-
     result = collect_basic_statistic(type_of_analysis, trial_id, snapshot -> get_reachable_fitness(snapshot, threshold, min_samples, max_samples))
 
 elseif type_of_analysis == "RD"
-
     result = collect_basic_statistic(type_of_analysis, trial_id, snapshot -> get_reachable_diversity(snapshot, threshold, min_samples, max_samples))
 
 elseif type_of_analysis == "PD"
-
     result = collect_compare_to_end_statistic(
         type_of_analysis, 
         trial_id,  
@@ -173,11 +172,9 @@ elseif type_of_analysis == "PD"
     )
 
 elseif type_of_analysis == "EP"
-
     result = collect_basic_statistic(type_of_analysis, trial_id, snapshot -> get_evolutionary_potential(snapshot, 600_000, threshold, min_samples, max_samples))
 
 elseif type_of_analysis == "CPD"
-
     result = collect_cross_statistic(
         type_of_analysis, 
         trial_id,  
@@ -186,7 +183,6 @@ elseif type_of_analysis == "CPD"
     )
 
 elseif type_of_analysis == "CLA"
-
     result = collect_cross_statistic(
         type_of_analysis, 
         trial_id, 
@@ -195,12 +191,18 @@ elseif type_of_analysis == "CLA"
     )
 
 elseif type_of_analysis == "ENT"
-
     result = collect_basic_statistic(type_of_analysis, trial_id, get_entropy)
+
+elseif type_of_analysis == "GD"
+    result = collect_basic_statistic(type_of_analysis, trial_id, snapshot -> get_genotype_diversity(snapshot, Levenshtein(), threshold, min_samples, max_samples))
+
+elseif type_of_analysis == "PHD"
+    result = collect_basic_statistic(type_of_analysis, trial_id, snapshot -> get_phenotype_diversity(snapshot, threshold, min_samples, max_samples))
+
+elseif type_of_analysis == "NN"
+    result = collect_basic_statistic(type_of_analysis, trial_id, snapshot -> get_neutrality(snapshot, load_graph_data()))
 
 end
 
 plot_result(result..., type_of_analysis, trial_id)
 save_result(result, type_of_analysis, trial_id)
-
-save_calculated(data)

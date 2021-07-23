@@ -1,7 +1,6 @@
 function get_axiom_network()
     network = Network()
     update_inputs_outputs!(network, [get_axiom_node()])
-    add_external_nodes!(network)
     return network
 end
 function get_axiom_node()

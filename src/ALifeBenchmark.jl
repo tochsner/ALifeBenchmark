@@ -30,7 +30,7 @@ export save_offspring_log, build_genotype_graph, analyse_graph, calculate_phenot
 export GGraphData, save_graph_data, load_graph_data
 export build_genotype_graph!, build_phenotype_graph!, build_neutral_networks!, analyse_phenotype_graph
 
-export get_diversity_threshold, analyse_neutral_networks, analyse_neutral_network_graph
+export get_diversity_threshold, analyse_neutral_networks, analyse_neutral_network_graph, get_average_nn_size
 
 # Null Models
 

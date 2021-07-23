@@ -23,8 +23,8 @@ most_frequent_genotypes = unique(most_frequent_genotypes)
 
 println(length(most_frequent_genotypes))
 
+"""
 graph_data = load_graph_data()
-build_neutral_networks!(graph_data, 1.8e-5)
 
 nn_dict = Dict()
 nns = []
@@ -47,10 +47,13 @@ end
 
 @assert length(nns) == length(most_frequent_genotypes)
 
+
 occurances = zeros(length(snapshot_ids), length(nn_dict))
+times = zeros(length(snapshot_ids))
 
 for (i, snapshot_id) in enumerate(snapshot_ids)
     genotype_distribution = get_snapshot(snapshot_id) |> get_genotype_distribution
+    times[i] = get_snapshot(snapshot_id).time
 
     for (j, genotype) in enumerate(most_frequent_genotypes)
         if haskey(genotype_distribution, genotype)
@@ -71,13 +74,14 @@ for (i, snapshot_id) in enumerate(snapshot_ids)
         end
     end
 end
-"""
-plot(occurances,
-            title = "",
-            label = "",
-            xguide = "Time",
-            yguide = "Genotype Occurances",
-            size = (900, 600),
-            margin = 10mm,
-            dpi = 1000)
-savefig("nn_distribution_$trial_id.png")
+
+
+plot(times, occurances,
+        title = "",
+        label = "",
+        xguide = "Time",
+        yguide = "Genotype Occurances",
+        size = (900, 600),
+        margin = 10mm,
+        dpi = 1000)
+savefig("genotype_distribution_$trial_id.png")

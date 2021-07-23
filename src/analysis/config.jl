@@ -1,4 +1,4 @@
-const GENERAL_FOLDER = "geb_logs"
+const GENERAL_FOLDER = "tierra_logs/tierra_logs" # geb_logs"
 
 const SNAPSHOTS_FOLDER = GENERAL_FOLDER * "/snapshots/"
 const LOGGER_FOLDER = GENERAL_FOLDER * "/logs/"

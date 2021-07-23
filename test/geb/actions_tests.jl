@@ -174,8 +174,7 @@ end
 
     network = ALifeBenchmark.Network()
     ALifeBenchmark.update_inputs_outputs!(network, [node1])
-    ALifeBenchmark.add_external_nodes!(network)
-    ALifeBenchmark.activate_inputs!(network, [0, 0], [0, 0])
+    ALifeBenchmark.activate_inputs!(network, [0, 0])
 
     # build Geb model
 

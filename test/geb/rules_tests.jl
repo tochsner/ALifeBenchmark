@@ -60,11 +60,11 @@ end
         ALifeBenchmark.Rule("00", "11", "111", false, false, false, false, false, false, 3, 3),
         ALifeBenchmark.Rule("000", "11", "111", false, false, false, false, false, false, 4, 4),
         ALifeBenchmark.Rule("11", "11", "111", false, false, false, false, false, false, 5, 5)
-    ]) == Any[
-        ALifeBenchmark.Rule("00", "11", "111", false, false, false, false, false, false, 3, 3),
-        ALifeBenchmark.Rule("000", "11", "111", false, false, false, false, false, false, 4, 4),
-        ALifeBenchmark.Rule("01", "11", "0011", false, false, false, false, false, false, 2, 2),
-        ALifeBenchmark.Rule("11", "11", "111", false, false, false, false, false, false, 5, 5)
+        ]) == Any[
+            ALifeBenchmark.Rule("00", "11", "111", false, false, false, false, false, false, 3, 3),
+            ALifeBenchmark.Rule("000", "11", "111", false, false, false, false, false, false, 4, 4),
+            ALifeBenchmark.Rule("01", "11", "0011", false, false, false, false, false, false, 2, 2),
+            ALifeBenchmark.Rule("11", "11", "111", false, false, false, false, false, false, 5, 5)
     ]
 
     @test ALifeBenchmark.filter_rules([
@@ -74,10 +74,10 @@ end
         ALifeBenchmark.Rule("00", "11", "0011", false, false, false, false, false, false, 1, 3),
         ALifeBenchmark.Rule("000", "11", "111", false, false, false, false, false, false, 4, 4),
         ALifeBenchmark.Rule("11", "11", "111", false, false, false, false, false, false, 5, 5)
-    ]) == Any[
+        ]) == Any[
         ALifeBenchmark.Rule("00", "11", "0011", false, false, false, false, false, false, 1, 3),
         ALifeBenchmark.Rule("000", "11", "111", false, false, false, false, false, false, 4, 4),
-        ALifeBenchmark.Rule("11", "11", "111", false, false, false, false, false, false, 5, 5)
+        ALifeBenchmark.Rule("11", "11", "111", false, false, false, false, false, false, 5, 5)        
     ]
 
     @test ALifeBenchmark.filter_rules([
