@@ -45,9 +45,9 @@ function determine_input_activations(model::GebModel, organism::GebOrganism)
         for neighbor in relevant_neighbors
             neighbor_sum = 0.0
 
-            for output in neighbor.network.external_outputs
+            for output in neighbor.network.outputs
                 if _is_match(string[2:end], output.string)
-                    neighbor_sum += sum([a for (a, n) in zip(output.excitatory_activation, output.in_excitatory) if n.has_fired])
+                    neighbor_sum += output.io_value
                 end
             end
 
