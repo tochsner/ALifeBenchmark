@@ -34,10 +34,11 @@ function perform!(action::GebAction, model::GebModel, organism::GebOrganism)
     end
 
     if has_match
-        excitatory_sum = max(excitatory_sum, 1)
+        excitatory_sum = min(excitatory_sum, 1)
     else
-        excitatory_sum = NOISE_LEVEL_MISSING_OUTPUT*rand()
+        excitatory_sum = NOISE_LEVEL_MISSING_OUTPUT*rand()        
     end
+
 
     perform!(action, model, organism, excitatory_sum)
 end
@@ -102,7 +103,7 @@ function perform!(::CrossOver, model::GebModel, parent_1::GebOrganism, activatio
     end
 end
 
-function perform!(::Fight, model::GebModel, fighter::GebOrganism, activation)
+function perform!(::Fight, model::GebModel, fighter::GebOrganism, activation)    
     if activation < FIGHT_THRESHOLD return end
 
     target = _get_organism_in_front(model, fighter)
@@ -112,7 +113,7 @@ function perform!(::Fight, model::GebModel, fighter::GebOrganism, activation)
     end
 end
 
-function perform!(::TurnAntiClockwise, ::GebModel, organism::GebOrganism, angle)
+function perform!(::TurnAntiClockwise, ::GebModel, organism::GebOrganism, angle)    
     organism.direction = mod(organism.direction - min(MAX_TURN, Int(round(MAX_TURN*angle))), 360)
 end
 function perform!(::TurnClockwise, ::GebModel, organism::GebOrganism, angle)

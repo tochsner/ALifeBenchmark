@@ -20,23 +20,25 @@ mutable struct Node
 
     type::NodeType
 
-    inhibitory_activation::Vector{Float64}
-    excitatory_activation::Vector{Float64}
+    inhibitory_output::Float64
+    excitatory_output::Float64
+    
+    temp_inhibitory_output::Float64
+    temp_excitatory_output::Float64
 
-    has_fired::Bool
     reachable_from_input::Bool
 
     io_value::Float64
 
     function Node(string, in_inhibitory, out_inhibitory, in_excitatory, out_excitatory)
         new(string, in_inhibitory, out_inhibitory, in_excitatory, out_excitatory,
-            [], [], [], [], HiddenNode(), [], [], false, false, 0)
+            [], [], [], [], HiddenNode(), 0, 0, 0, 0, false, 0)
     end
 
-    Node(string) = new(string, [], [], [], [], [], [], [], [], HiddenNode(), [], [], false, false, 0)
+    Node(string) = new(string, [], [], [], [], [], [], [], [], HiddenNode(), 0, 0, 0, 0, false, 0)
 end
 
-function fill_temp!(node)
+function fill_temp_links!(node)
     node.temp_in_inhibitory = []
     node.temp_out_inhibitory = []
     node.temp_in_excitatory = []
@@ -47,7 +49,7 @@ function fill_temp!(node)
     append!(node.temp_out_excitatory, node.out_excitatory)
 end
 
-function apply_temp!(node)
+function apply_temp_links!(node)
     node.in_inhibitory = []
     node.out_inhibitory = []
     node.in_excitatory = []
@@ -59,7 +61,7 @@ function apply_temp!(node)
     append!(node.out_excitatory, node.temp_out_excitatory)
 end
 
-function reset_activations!(node)
-    node.inhibitory_activation = [-1 for _ in node.in_inhibitory]
-    node.excitatory_activation = [-1 for _ in node.in_excitatory]
+function apply_temp_activations!(node)
+    node.inhibitory_output = node.temp_inhibitory_output
+    node.excitatory_output = node.temp_excitatory_output
 end

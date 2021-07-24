@@ -3,8 +3,7 @@ import SharedArrays
 import Base.Threads.@threads
 
 function execute!(model::GebModel)
-    # 0. log births of the initial organisms in the first execution step
-
+    # log births of the initial organisms in the first execution step
     if model.time == 0
         for organism in model.organisms
             log_birth(model.logger, model, organism)
@@ -37,7 +36,7 @@ function execute!(model::GebModel)
     end
     
     for (i, organism) in organisms_in_batch
-        activate_inputs!(organism.network, activations_in_batch[i, 1:activation_size_in_batch[i]])     
+        fire!(organism.network, activations_in_batch[i, 1:activation_size_in_batch[i]])     
     end
 
     for (_, organism) in organisms_in_batch

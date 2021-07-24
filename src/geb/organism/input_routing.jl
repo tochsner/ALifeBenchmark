@@ -62,7 +62,7 @@ function determine_input_activations(model::GebModel, organism::GebOrganism)
         
         push!(activations, activation_sum)
     end
-        
+
     return activations
 end
 

@@ -4,7 +4,7 @@ function develop_nodes!(network::Network, rules)
     if network.fully_developed return end
     if length(rules) == 0 return end
  
-    apply_to_all(fill_temp!, network)
+    apply_to_all(fill_temp_links!, network)
     
     any_change = false
     num_reachable_nodes = 0
@@ -28,7 +28,7 @@ function develop_nodes!(network::Network, rules)
         network.fully_developed = true
     end
 
-    apply_to_all(apply_temp!, reachable_nodes, to_temp = true)
+    apply_to_all(apply_temp_links!, reachable_nodes, to_temp = true)
 
     apply_to_all(_remove_deleted, reachable_nodes)
     filter!(node -> node.string != DELETED, reachable_nodes)

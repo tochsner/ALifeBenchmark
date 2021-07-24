@@ -88,23 +88,28 @@ end
     @test network.inputs == [node1, node2]
     @test network.outputs == [node6, node7]
 
-    ALifeBenchmark.activate_inputs!(network, [0, 0])
+    ALifeBenchmark.fire!(network, [0, 0])
+    ALifeBenchmark.fire!(network, [0, 0])
+    ALifeBenchmark.fire!(network, [0, 0])
+    ALifeBenchmark.fire!(network, [0, 0])
+    ALifeBenchmark.fire!(network, [0, 0])
+    ALifeBenchmark.fire!(network, [0, 0])
 
     @test node1.io_value == 0.0
     @test node2.io_value == 0.0
     @test node3.io_value == 0.0
     @test node4.io_value == 0.0
     @test node5.io_value == 0.0
-    @test node6.io_value == 0.2805599027529448
-    @test node7.io_value == 0.21156818398564092
+    @test node6.io_value == 0.0
+    @test node7.io_value == 0.22179478922723606
     
-    ALifeBenchmark.activate_inputs!(network, [1, 2])
+    ALifeBenchmark.fire!(network, [1, 2])
     
     @test node1.io_value == 1.0
     @test node2.io_value == 2.0
     @test node3.io_value == 0.0
     @test node4.io_value == 0.0
     @test node5.io_value == 0.0
-    @test node6.io_value == 0.16094874272296766
-    @test node7.io_value == 0.7302818081187501
+    @test node6.io_value == 0.0
+    @test node7.io_value == 0.13472467522755335
 end

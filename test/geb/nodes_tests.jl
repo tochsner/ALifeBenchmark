@@ -16,9 +16,9 @@ end
     node = ALifeBenchmark.Node("1", [], [], [], [ALifeBenchmark.Node("0")])
     rule = ALifeBenchmark.Rule("1", "11", "", false, false, false, false, false, false, 0, 0)
 
-    ALifeBenchmark.apply_to_all(ALifeBenchmark.fill_temp!, node)
+    ALifeBenchmark.apply_to_all(ALifeBenchmark.fill_temp_links!, node)
     ALifeBenchmark._apply_rule!(rule, node)
-    ALifeBenchmark.apply_to_all(ALifeBenchmark.apply_temp!, node)
+    ALifeBenchmark.apply_to_all(ALifeBenchmark.apply_temp_links!, node)
 
     @test node.string == "11"
     @test node.out_excitatory[1].string == "0"
@@ -27,9 +27,9 @@ end
     node = ALifeBenchmark.Node("1", [], [], [], [ALifeBenchmark.Node("0")])
     rule = ALifeBenchmark.Rule("1", "11", "010", false, false, false, true, false, false, 0, 0)
 
-    ALifeBenchmark.apply_to_all(ALifeBenchmark.fill_temp!, node)
+    ALifeBenchmark.apply_to_all(ALifeBenchmark.fill_temp_links!, node)
     ALifeBenchmark._apply_rule!(rule, node)
-    ALifeBenchmark.apply_to_all(ALifeBenchmark.apply_temp!, node)
+    ALifeBenchmark.apply_to_all(ALifeBenchmark.apply_temp_links!, node)
 
     @test node.string == "11"
     @test length(node.out_excitatory) == 2
@@ -40,9 +40,9 @@ end
     node = ALifeBenchmark.Node("1", [], [ALifeBenchmark.Node("101")], [ALifeBenchmark.Node("0")], [])
     rule = ALifeBenchmark.Rule("1", "11", "010", true, false, false, false, true, false, 0, 0)
 
-    ALifeBenchmark.apply_to_all(ALifeBenchmark.fill_temp!, node)
+    ALifeBenchmark.apply_to_all(ALifeBenchmark.fill_temp_links!, node)
     ALifeBenchmark._apply_rule!(rule, node)
-    ALifeBenchmark.apply_to_all(ALifeBenchmark.apply_temp!, node)
+    ALifeBenchmark.apply_to_all(ALifeBenchmark.apply_temp_links!, node)
 
     @test node.string == "11"
     @test length(node.out_excitatory) == 0
