@@ -31,10 +31,12 @@ graph_data = load_graph_data()
 
 if "build_gg_graph" in ARGS
     build_genotype_graph!(graph_data)
+    save_graph_data(graph_data)
 end
 
 if "build_p_graph" in ARGS
     build_phenotype_graph(graph_data, 5, 0.05, 50, 500)
+    save_graph_data(graph_data)
 end
 
 if "build_nn" in ARGS
@@ -42,6 +44,7 @@ if "build_nn" in ARGS
     epsilon = 1e-7
     @info epsilon
     build_neutral_networks!(graph_data, epsilon)
+    save_graph_data(graph_data)
 end
 
 if "general_analysis" in ARGS
