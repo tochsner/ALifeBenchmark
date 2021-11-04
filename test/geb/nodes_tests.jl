@@ -23,7 +23,7 @@ end
     @test node.string == "11"
     @test node.out_excitatory[1].string == "0"
 
-
+    
     node = ALifeBenchmark.Node("1", [], [], [], [ALifeBenchmark.Node("0")])
     rule = ALifeBenchmark.Rule("1", "11", "010", false, false, false, true, false, false, 0, 0)
 

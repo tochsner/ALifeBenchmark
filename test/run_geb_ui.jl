@@ -4,7 +4,7 @@ import Random
 using Profile
 using Serialization
 
-model = deserialize("geb_logs/snapshots/778557744733939_842507053402753") # GebModel(size=20)
+model = GebModel(size=20)
 
 c = @GtkCanvas()
 win = GtkWindow(c, "Geb", 1000, 800)

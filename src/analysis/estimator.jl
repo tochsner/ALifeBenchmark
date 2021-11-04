@@ -1,3 +1,17 @@
+function estimate(get_sample_from_input, inputs, rel_tolerance, min_samples, max_samples; print_progress = false, return_all_samples = false)
+    shuffled_inputs = shuffle(inputs)
+    max_samples = min(max_samples, length(inputs))
+    
+    i = 0
+
+    estimate(_get_new_estimation, _get_estimation_variance, rel_tolerance, min_samples, max_samples, 
+        print_progress = print_progress, return_all_samples = return_all_samples) do
+        
+        i += 1
+        return get_sample_from_input(shuffled_inputs[i])
+    end 
+end
+
 function estimate(get_sample, rel_tolerance, min_samples, max_samples; print_progress = false, return_all_samples = false)
     estimate(get_sample, _get_new_estimation, _get_estimation_variance, rel_tolerance, min_samples, max_samples, print_progress = print_progress, return_all_samples = return_all_samples)
 end

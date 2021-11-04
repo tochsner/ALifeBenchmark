@@ -1,3 +1,5 @@
+using SparseArrays
+
 function build_metric_induced_graph(metric, graph)
     n = nv(graph)
     
@@ -23,5 +25,5 @@ function get_simple_digraph(graph)
 end
 
 function get_simple_weighted_graph(graph)
-    SimpleWeightedGraph(max.(adjacency_matrix(graph), transpose(adjacency_matrix(graph))))
+    SimpleWeightedGraph(convert(SparseMatrixCSC{Real, Int64}, max.(adjacency_matrix(graph), transpose(adjacency_matrix(graph)))))
 end

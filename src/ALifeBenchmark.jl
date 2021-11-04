@@ -22,19 +22,22 @@ export get_adaption_of_genotype, get_adaption_of_snapshot
 export is_reproducing
 export get_entropy
 export get_genotype_diversity
-export get_neutrality
+export get_neutrality, get_neutrality_null_model
 
 export _wasserstein, get_genotype_distribution
 
 export save_offspring_log, build_genotype_graph, analyse_graph, calculate_phenotype_graph!
 export GGraphData, save_graph_data, load_graph_data
-export build_genotype_graph!, build_phenotype_graph!, build_neutral_networks!, analyse_phenotype_graph
+export build_genotype_graph!, build_phenotype_graph!, build_neutral_networks!, analyse_phenotype_graph, get_neutral_networks_by_g_sampling
 
-export get_diversity_threshold, analyse_neutral_networks, analyse_neutral_network_graph, get_average_nn_size
+export get_diversity_threshold, analyse_neutral_networks, analyse_neutral_network_graph
+export get_average_nn_size, get_average_radius, get_average_diameter, get_average_clustering, get_nn_size_percentile
+export get_average_phenotype_robustness, get_average_phenotype_evolvability, get_average_phenotype_evolvability_robustness_cor
+export get_shape_space_covering
 
 # Null Models
 
-export get_house_of_cards_null_model
+export get_house_of_cards_null_model, get_complete_house_of_cards_null_model
 
 
 # Tierra
@@ -88,6 +91,8 @@ include("analysis/estimator.jl")
 
 include("analysis/utils.jl")
 include("analysis/graph_utils.jl")
+
+include("analysis/GP_maps/graph_data.jl")
 
 include("analysis/statistics/phenotype_similarity.jl")
 include("analysis/statistics/reachable_diversity.jl")

@@ -5,23 +5,13 @@ using MetaGraphs
 using Bijections
 using Statistics
 import LightGraphs.Parallel
-
-mutable struct GGraphData
-    genotype_vertex_mapping::Bijection
-    genotype_graph::SimpleWeightedDiGraph
-    
-    phenotype_graph::SimpleWeightedDiGraph
-
-    neutral_networks::Vector
-    neutral_network_graph::SimpleWeightedDiGraph
-
-    fitness_values::Dict
-
-    GGraphData() = new(Bijection(), SimpleWeightedDiGraph(0), SimpleWeightedDiGraph(0), [], SimpleWeightedDiGraph(0), Dict())
-end
+import Base.Threads.@threads
 
 function save_graph_data(graph::GGraphData)
     serialize(CALCULATED_FOLDER * "GGraphData", graph)
+end
+function save_graph_data(graph::GGraphData, epsilon, name)
+    serialize(CALCULATED_FOLDER * "GGraphData $epsilon $name", graph)
 end
 function load_graph_data() 
     if isfile(CALCULATED_FOLDER * "GGraphData")
@@ -29,6 +19,12 @@ function load_graph_data()
     else
         GGraphData()
     end
+end  
+function load_graph_data(epsilon) 
+    deserialize(CALCULATED_FOLDER * "GGraphData $epsilon")
+end   
+function load_graph_data(epsilon, name) 
+    deserialize(CALCULATED_FOLDER * "GGraphData $epsilon $name")
 end   
 
 function get_overall_genotype_distribution(graph_data::GGraphData)
@@ -40,7 +36,7 @@ function get_overall_genotype_distribution(graph_data::GGraphData)
         if length(outgoing) == 0
             push!(occurances, 0)
         else
-            push!(occurances, sum([graph_data.genotype_graph.weights[vertex, u] for u in outgoing]))
+            push!(occurances, sum([graph_data.genotype_graph.weights[u, vertex] for u in outgoing]))
         end
     end
 
@@ -49,7 +45,7 @@ function get_overall_genotype_distribution(graph_data::GGraphData)
     return occurances
 end
 
-function build_genotype_graph!(graph_data::GGraphData)    
+function build_genotype_graph!(graph_data::GGraphData)
     parent_offsprings = deserialize(CALCULATED_FOLDER * "parent_offspring_ocurrances")
 
     genotype_mapping = Bijection()
@@ -98,7 +94,7 @@ function build_phenotype_graph!(graph_data::GGraphData, min_occurances, toleranc
         if u == v continue end
         if (v, u) in edges_to_test continue end
         if has_edge(graph_data.genotype_graph, u, v) == false continue end
-        if graph_data.genotype_graph.weights[u, v] < min_occurances continue end
+        if graph_data.genotype_graph.weights[v, u] < min_occurances continue end
 
         push!(edges_to_test, (u, v))
     end
@@ -123,11 +119,11 @@ function build_phenotype_graph!(graph_data::GGraphData, min_occurances, toleranc
     phenotype_similarities_dict = Dict()
 
     for i in 1:num_edges_to_test
-        similariry = phenotype_similarities[i]
+        similarity = phenotype_similarities[i]
         u, v = edges_to_test[i]
 
-        phenotype_similarities_dict[(u, v)] = similariry
-        phenotype_similarities_dict[(v, u)] = similariry
+        phenotype_similarities_dict[(u, v)] = similarity
+        phenotype_similarities_dict[(v, u)] = similarity
     end
 
     @info "Build Phenotype Similarities Graph."
@@ -144,31 +140,15 @@ function build_phenotype_graph!(graph_data::GGraphData, min_occurances, toleranc
     graph_data.phenotype_graph = phenotype_graph
 end
 
-function analyse_phenotype_graph(graph_data::GGraphData)
-    weights = [e.weight for e in edges(graph_data.phenotype_graph)]
-
-    println("Minimum Weight: \t $(minimum(weights))")
-    println("Maximum Weight: \t $(maximum(weights))")
-    println("Mean Weight: \t $(mean(weights))")
-    println("Median Weight: \t $(median(weights))")
-
-    println()
-    println("Quantiles:")
-    for q in 0:0.1:1
-        println("$q: \t $(quantile(weights, q))")
-    end
-end
-
 function build_neutral_networks!(graph_data::GGraphData, epsilon)
     undirected_phenotype_graph = get_simple_weighted_graph(graph_data.phenotype_graph)
     
     neutral_networks = []
     already_assigned_nodes = []
-    memberships = Dict()
 
     # find all neutral networks
 
-    for edge in edges(undirected_phenotype_graph)
+    for (i, edge) in edges(undirected_phenotype_graph) |> enumerate
 	    if has_edge(undirected_phenotype_graph, edge) == false continue end
         
 	    node = src(edge)    # we ignore sinks
@@ -177,36 +157,14 @@ function build_neutral_networks!(graph_data::GGraphData, epsilon)
 	    neutral_network = _find_neutral_network(undirected_phenotype_graph, node, epsilon)
         push!(neutral_networks, neutral_network)
 
-        for node in neutral_network
-            push!(already_assigned_nodes, node)
-            memberships[node] = length(neutral_networks)
-        end
-    end
+        append!(already_assigned_nodes, neutral_network)
 
-    # create the graph of NNs and determine the minimum number of mutations between all NNs
-
-    num_neutral_networks = length(neutral_networks)
-    neutral_network_graph = SimpleWeightedDiGraph(num_neutral_networks)
-    
-    for (i, neutral_network_1) in enumerate(neutral_networks)
-        distances = gdistances(graph_data.genotype_graph, neutral_network_1)
-        
-        for (j, neutral_network_2) in enumerate(neutral_networks)
-            if neutral_network_1 == neutral_network_2 continue end
-
-            distances_to_nn_2 = distances[neutral_network_2]
-            min_distance_to_nn_2 = minimum(distances_to_nn_2)
-
-            if min_distance_to_nn_2 == typemax(Int64) continue end
-            
-            @assert min_distance_to_nn_2 > 0
-
-            add_edge!(neutral_network_graph, i, j, min_distance_to_nn_2)
+        if i % 1000 == 0
+            @info " - $i, $(length(neutral_networks)) NNs"
         end
     end
 
     graph_data.neutral_networks = neutral_networks
-    graph_data.neutral_network_graph = neutral_network_graph
 end
 
 function _find_neutral_network(graph, starting_vertex, epsilon)
@@ -217,7 +175,7 @@ function _find_neutral_network(graph, starting_vertex, epsilon)
     while 0 < length(to_test)
         u, v = pop!(to_test)
  
-        if graph.weights[u, v] <= epsilon            
+        if graph.weights[v, u] <= epsilon            
             push!(neutral_network, v)
 
             for n in outneighbors(graph, v)
@@ -229,4 +187,51 @@ function _find_neutral_network(graph, starting_vertex, epsilon)
     end
 
     return unique(neutral_network)
+end
+
+function get_neutral_networks_by_g_sampling(graph_data, epsilon, n, tolerance, min_samples, max_samples)
+    num_genotypes = nv(graph_data.genotype_graph)
+    
+    neutral_networks = []
+    
+    for _ in 1:n
+        starting_genotype = rand(1:num_genotypes)
+        neutral_network = build_neutral_network(graph_data, starting_genotype, epsilon, tolerance, min_samples, max_samples)
+        push!(neutral_networks, neutral_network)
+        @info "$(length(neutral_networks))-th generated with $(length(neutral_network)) nodes"
+    end
+
+    return neutral_networks
+end
+
+
+function build_neutral_network(graph_data, starting_vertex, epsilon, tolerance, min_samples, max_samples)
+    neutral_network = []
+    _build_neutral_network(graph_data, starting_vertex, neutral_network, epsilon, tolerance, min_samples, max_samples)
+    return neutral_network
+end
+
+function _build_neutral_network(graph_data, vertex, already_built_nn, epsilon, tolerance, min_samples, max_samples)
+    push!(already_built_nn, vertex)
+
+    neighbors = outneighbors(graph_data.genotype_graph, vertex)
+
+    for n in neighbors
+        if n in already_built_nn continue end
+
+        if has_edge(graph_data.phenotype_graph, vertex, n)
+            phenotype_similarity = graph_data.phenotype_graph.weights[n, vertex]
+        else
+            genotype_u, genotype_v = graph_data.genotype_vertex_mapping(vertex), graph_data.genotype_vertex_mapping(n)
+            
+            phenotype_similarity = get_phenotype_similarity(genotype_u, genotype_v, tolerance, min_samples, max_samples)
+            phenotype_similarity = max(eps(), phenotype_similarity)
+            
+            add_edge!(graph_data.phenotype_graph, vertex, n, phenotype_similarity)        
+        end
+
+        if phenotype_similarity <= epsilon
+            _build_neutral_network(graph_data, n, already_built_nn, epsilon, tolerance, min_samples, max_samples)
+        end
+    end
 end

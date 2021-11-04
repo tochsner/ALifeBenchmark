@@ -1,109 +1,123 @@
 using LightGraphs
 using Serialization
 using Statistics
+import Memoize
+import Base.Threads.@threads
+import SharedArrays.SharedArray
 
-function get_diversity_threshold(graph_data::GGraphData, threshold_percentile)
-    _, variances = _get_fitness_variance(graph_data, 0.05, 500, 5000)
-    
-    diversities = variances .* 2
-    diversity_threshold = quantile(diversities, threshold_percentile)
+get_average_nn_size(graph_data::GGraphData) = length.(graph_data.neutral_networks) |> mean
+function get_nn_size_percentile(graph_data::GGraphData)
+    neutral_networks = graph_data.neutral_networks
+    num_neutral_networks = length(neutral_networks)
+    num_genotypes = sum(length.(neutral_networks))
 
-    serialize("div", diversities)
+    percentile = 0.1*num_neutral_networks
 
-    return diversity_threshold
-end
+    lengths_sorted = sort(length.(neutral_networks), rev=true)
+    lengths_chosen = 0
+    for (i, l) in enumerate(lengths_sorted)
+        lengths_chosen += l
 
-function _get_fitness_variance(graph_data::GGraphData, rel_tolerance, min_samples, max_samples)
-    num_genotypes = nv(graph_data.genotype_graph)
-    genotype_weights = get_overall_genotype_distribution(graph_data)
-    
-    fitness_variance = estimate(rel_tolerance, min_samples, max_samples, print_progress = true, return_all_samples = true) do
-        vertex = weighted_rand(1:num_genotypes, genotype_weights)
-        genotype = graph_data.genotype_vertex_mapping(vertex)
-        
-        snapshot = sample_snapshot_id() |> get_snapshot
-        sample = get_organisms(snapshot) |> rand
-        sample_id = get_id(snapshot, sample)
-
-        sample_similaritiy = (get_fitness(snapshot, sample_id, genotype) - get_fitness(snapshot, sample_id, genotype))^2  
-        
-        return sample_similaritiy / 2
+        if i >= percentile
+            return lengths_chosen / num_genotypes
+        end
     end
 
-    return fitness_variance
+    return 1.0
+end
+get_average_diameter(graph_data::GGraphData) = analyse_neutral_networks(graph_data, diameter)
+get_average_radius(graph_data::GGraphData) = analyse_neutral_networks(graph_data, radius)
+get_average_clustering(graph_data::GGraphData) = analyse_neutral_networks(graph_data, global_clustering_coefficient)
+get_average_phenotype_robustness(graph_data::GGraphData) = mean([get_phenotype_robustness(graph_data, nn) for nn in 1:length(graph_data.neutral_networks)])
+get_average_phenotype_evolvability(graph_data::GGraphData) = mean([get_phenotype_evolvability(graph_data, nn) for nn in 1:length(graph_data.neutral_networks)])
+function get_average_phenotype_evolvability_robustness_cor(graph_data::GGraphData)
+    cor(
+        [get_phenotype_evolvability(graph_data, i) for i in 1:length(graph_data.neutral_networks)],
+        [get_phenotype_robustness(graph_data, i) for i in 1:length(graph_data.neutral_networks)]
+        )
+end
+function get_shape_space_covering(graph_data::GGraphData, n)    
+    unweighted_phenotype_graph = get_simple_digraph(graph_data.phenotype_graph)
+    genotypes = [g for neutral_network in graph_data.neutral_networks for g in neutral_network]
+
+    shape_space_covering = estimate(genotypes, 0.01, 100, 10_000) do genotype_index
+        return get_shape_space_covering(graph_data, unweighted_phenotype_graph, genotype_index, n)
+    end
+
+    return shape_space_covering
+end
+    
+get_phenotype_robustness(graph_data::GGraphData, network_index) = mean([get_genotype_robustness(graph_data, i, network_index) for i in graph_data.neutral_networks[network_index]])
+
+function get_phenotype_evolvability(graph_data::GGraphData, network_index)
+    reachable_genotypes = []
+
+    for genotype_index in graph_data.neutral_networks[network_index]
+        current_reachable_genotypes = outneighbors(graph_data.phenotype_graph, genotype_index)
+        append!(reachable_genotypes, current_reachable_genotypes)
+    end
+
+    reachable_genotypes = unique(reachable_genotypes)
+    reachable_networks = get_corresponding_neutral_networks(graph_data, reachable_genotypes)
+    filter!(x -> x != 0, reachable_networks)                # filter out genotypes not on any neutral network
+    filter!(x -> x != network_index, reachable_networks)    # filter out genotypes on the network in question
+    reachable_networks = unique(reachable_networks)
+
+    return length(reachable_networks) / (length(graph_data.neutral_networks) - 1)
 end
 
-function analyse_neutral_networks(graph_data::GGraphData)
-    println("Size: \t $(analyse_neutral_networks(graph_data, nv))")
-    println("Diameter: \t $(analyse_neutral_networks(graph_data, diameter))")
-    println("Radius: \t $(analyse_neutral_networks(graph_data, radius))")
-    println("Characteristic Path Length: \t $(analyse_neutral_networks(graph_data, g -> mean(1 / closeness_centrality(g))))")
-    println("Clustering: \t $(analyse_neutral_networks(graph_data, global_clustering_coefficient))")
-    # println("Assortativity: \t $(analyse_neutral_networks(graph_data, assortativity))")
+get_genotype_robustness(graph_data, genotype_index) = get_genotype_robustness(GGraphData, genotype_index, get_corresponding_neutral_network(graph_data, genotype_index))
+function get_genotype_robustness(graph_data::GGraphData, genotype_index, network_index)
+    neutral_network = graph_data.neutral_networks[network_index]
+    
+    neighbors = outneighbors(graph_data.phenotype_graph, genotype_index)
+    neutral_neighbors = [n for n in neighbors if n in neutral_network]
+
+    return length(neutral_neighbors) / length(neighbors)
 end
 
-get_average_nn_size(graph_data::GGraphData) = analyse_neutral_networks(graph_data, nv)
+function get_shape_space_covering(graph_data::GGraphData, genotype_index, n)
+    get_shape_space_covering(graph_data, get_simple_digraph(graph_data.phenotype_graph), genotype_index, n)
+end
+function get_shape_space_covering(graph_data::GGraphData, unweighted_phenotype_graph::SimpleDiGraph, genotype_index, n)
+    reachable_genotypes = neighborhood(unweighted_phenotype_graph, genotype_index, n)
+
+    reachable_networks = get_corresponding_neutral_networks(graph_data, reachable_genotypes) |> unique   
+    filter!(x -> x != 0, reachable_networks)    # filter out genotypes not on any neutral network
+
+    return (length(reachable_networks) - 1) / (length(graph_data.neutral_networks) - 1)   # ignore neutral network of genotype_index in question
+end
 
 function analyse_neutral_networks(graph_data::GGraphData, metric)
-    genotype_weights = get_overall_genotype_distribution(graph_data)
-    total_used_weights = 0
-
-    result = 0
+    results = []
 
     for neutral_network in graph_data.neutral_networks
-        neutral_network_weight = sum(genotype_weights[neutral_network]) # 1 / length(graph_data.neutral_networks) # 
-        total_used_weights += neutral_network_weight
-
         graph, vertex_mapping = induced_subgraph(graph_data.genotype_graph, neutral_network)
         
         metric_induced_graph = build_metric_induced_graph(graph) do v_1, v_2
             genotype_index_1 = vertex_mapping[v_1]
             genotype_index_2 = vertex_mapping[v_2]
-
+ 
             genotype_1 = graph_data.genotype_vertex_mapping(genotype_index_1)
             genotype_2 = graph_data.genotype_vertex_mapping(genotype_index_2)
-
+ 
             return Levenshtein()(genotype_1, genotype_2)
         end
 
         current_result = metric(metric_induced_graph)
 
-        result += neutral_network_weight * current_result
+        push!(results, current_result)
     end
 
-    return result / total_used_weights
+    return mean(results)
 end
 
-function analyse_neutral_network_graph(graph_data::GGraphData)
-    println("Shape-Space-Covering:")
-    for i in 1:40
-        println("$i \t $(n_shape_space_covering(graph_data, i))")
-    end
+function get_corresponding_neutral_networks(graph_data::GGraphData, genotype_indices)
+    [get_corresponding_neutral_network(graph_data, genotype) for genotype in genotype_indices]
 end
-
-function n_shape_space_covering(graph_data::GGraphData, n)
-    num_neutral_networks = length(graph_data.neutral_networks)
-
-    reachable_percentages = []
-
-    for i in 1:num_neutral_networks
-        current_reachable_networks = [j for j in outneighbors(graph_data.neutral_network_graph, i) if graph_data.neutral_network_graph.weights[i, j] <= n]
-        current_reachable_percentage = length(current_reachable_networks) / (num_neutral_networks - 1) # we exclude the NN i itself
-
-        push!(reachable_percentages, current_reachable_percentage)
-    end
-
-    return mean(reachable_percentages)
-end
-
-function get_corresponding_neutral_networks(graph_data::GGraphData, genotypes)
-    [get_corresponding_neutral_network(graph_data, genotype) for genotype in genotypes]
-end
-function get_corresponding_neutral_network(graph_data::GGraphData, genotype)
-    if haskey(graph_data.genotype_vertex_mapping, genotype) == false return 0 end
-
+@memoize function get_corresponding_neutral_network(graph_data::GGraphData, genotype_index)
     for (i, neutral_network) in enumerate(graph_data.neutral_networks)        
-        if graph_data.genotype_vertex_mapping[genotype] in neutral_network
+        if genotype_index in neutral_network
             return i
         end
     end
@@ -113,9 +127,20 @@ end
 
 function get_neutral_network_distribution(graph_data::GGraphData, snapshot)
     organisms = get_organisms(snapshot)
-    genotypes = [get_genotype(snapshot, organism) for organism in organisms]
+    genotypes = [graph_data.genotype_vertex_mapping[get_genotype(snapshot, organism)] for organism in organisms]
     neutral_networks = get_corresponding_neutral_networks(graph_data, genotypes)
     nn_distribution = get_distribution(neutral_networks)
 
     return nn_distribution
+end
+
+function pmean(get_value_from_item, items)
+    values = SharedArray{Float64}(length(items))
+
+    for (i, item) in enumerate(items) |> unique
+        value = get_value_from_item(item)
+        values[i] = value
+    end
+
+    return mean(values)
 end

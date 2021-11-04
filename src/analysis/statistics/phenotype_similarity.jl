@@ -1,8 +1,9 @@
 import Statistics
 using Base.Threads
+using Memoize
 
-function get_phenotype_similarity(genotype_1, genotype_2, rel_tolerance, min_samples, max_samples)
-    if genotype_1 == genotype_2 return 0.0 end
+@memoize function get_phenotype_similarity(genotype_1, genotype_2, rel_tolerance, min_samples, max_samples; test_identical = false)
+    if genotype_1 == genotype_2 && test_identical == false return 0.0 end
 
     similarity = estimate(rel_tolerance, min_samples, max_samples) do
 	    snapshot = sample_snapshot_id() |> get_snapshot

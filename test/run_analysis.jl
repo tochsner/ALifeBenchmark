@@ -6,6 +6,7 @@ using Serialization
 import Base.Threads.@threads
 using StringDistances: Levenshtein
 using Measures
+using LightGraphs
 
 function plot_result(times, values, name, trial_id)
     plot(times, values, 
@@ -19,7 +20,7 @@ function plot_result(times, values, name, trial_id)
             size = (900, 600),
             margin = 10mm,
             dpi = 1000)
-    savefig("$name$trial_id")
+    savefig("$name$trial_id.svg")
 end
 
 function plot_result(times_1, times_2, values, name, trial_id)
@@ -73,12 +74,12 @@ function collect_compare_to_end_statistic(abbrevation, trial_id, get_statistic, 
         @info "$abbrevation \t $(done[] / num_snapshots) \t $current_time \t $current_value"
 
         if done[] % 100 == 0
-            plot_result(times, values, abbrevation, trial_id)
-            save_result((times, values), abbrevation, trial_id)
+            # plot_result(Array(times), Array(values), abbrevation, trial_id)
+            # save_result((Array(times), Array(values)), abbrevation, trial_id)
         end
     end
 
-    return (times, values)
+    return (Array(times), Array(values))
 end
 
 function collect_cross_statistic(abbrevation, trial_id, get_statistic, prepare)
@@ -93,12 +94,12 @@ function collect_cross_statistic(abbrevation, trial_id, get_statistic, prepare)
 
     done = Threads.Atomic{Int}(0)
 
-    @threads for (i, snapshot_id_1) in (shuffle(snapshot_ids) |> enumerate |> unique)
+    @threads for (i, snapshot_id_1) in (shuffle(snapshot_ids[1:5:end]) |> enumerate |> unique)
         snapshot_1 = get_snapshot(snapshot_id_1)
         prepared_1 = prepare(snapshot_1)
         time_1 = get_time(snapshot_1)
 
-        for (j, snapshot_id_2) in (shuffle(snapshot_ids) |> enumerate |> unique)
+        for (j, snapshot_id_2) in (shuffle(snapshot_ids[1:5:end]) |> enumerate |> unique)
             snapshot_2 = get_snapshot(snapshot_id_2)
             prepared_2 = prepare(snapshot_2)
             time_2 = get_time(snapshot_2)
@@ -118,13 +119,28 @@ function collect_cross_statistic(abbrevation, trial_id, get_statistic, prepare)
             end
 
             if done[] % 100_000 == 0
-                plot_result(times_1, times_2, values, abbrevation, trial_id)
-                save_result((times_1, times_2, values), abbrevation, trial_id)
+                plot_result(Array(times_1), Array(times_2), Array(values), abbrevation, trial_id)
+                save_result((Array(times_1), Array(times_2), Array(values)), abbrevation, trial_id)
             end
         end
     end
 
-    return (times_1, times_2, values)
+    return (Array(times_1), Array(times_2), Array(values))
+end
+
+"""
+Build Cache
+"""
+phenotype_cache = Dict()
+graph_data = load_graph_data()
+
+for edge in edges(graph_data.phenotype_graph)
+    u, v = src(edge), dst(edge)
+    genotype_u, genotype_v = graph_data.genotype_vertex_mapping(u), graph_data.genotype_vertex_mapping(v)
+
+    phenotype_similarity = edge.weight
+    phenotype_cache[(genotype_u, genotype_v)] = phenotype_similarity
+    phenotype_cache[(genotype_v, genotype_u)] = phenotype_similarity
 end
 
 """
@@ -200,7 +216,10 @@ elseif type_of_analysis == "PHD"
     result = collect_basic_statistic(type_of_analysis, trial_id, snapshot -> get_phenotype_diversity(snapshot, threshold, min_samples, max_samples))
 
 elseif type_of_analysis == "NN"
-    result = collect_basic_statistic(type_of_analysis, trial_id, snapshot -> get_neutrality(snapshot, load_graph_data()))
+    result = collect_basic_statistic(type_of_analysis, trial_id, snapshot -> get_neutrality(snapshot, 1e-5, phenotype_cache))
+
+elseif type_of_analysis == "NullNN"
+    result = collect_basic_statistic(type_of_analysis, trial_id, snapshot -> get_neutrality_null_model(snapshot, 1e-5, phenotype_cache))
 
 end
 
